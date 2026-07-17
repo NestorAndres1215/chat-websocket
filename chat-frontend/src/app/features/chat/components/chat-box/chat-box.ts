@@ -1,4 +1,13 @@
-import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  signal,
+  computed,
+  inject,
+  CUSTOM_ELEMENTS_SCHEMA,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -10,13 +19,14 @@ import { UserService } from '../../../user/services/user.service';
 import { UserModel } from '../../../user/models/user.model';
 import { DisplayableMessage } from '../../../group/models/displayable-message.model';
 import { CommonModule } from '@angular/common';
-
+import 'emoji-picker-element';
 @Component({
   selector: 'app-chat-box',
   standalone: true,
   imports: [FormsModule, MessageItem, CommonModule],
   templateUrl: './chat-box.html',
   styleUrl: './chat-box.css',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA], // <-- necesario para <emoji-picker>
 })
 export class ChatBox implements OnInit, OnDestroy {
   private readonly chatService = inject(ChatService);
@@ -85,7 +95,8 @@ export class ChatBox implements OnInit, OnDestroy {
         if (
           this.user &&
           message.recipientId === this.user.id &&
-          this.selectedRecipient()?.id === message.userId
+          this.selectedRecipient()?.id === message.userId &&
+          message.status !== 'LEIDO'
         ) {
           this.chatService.markAsRead(message.userId, this.user.id).subscribe({
             next: () => {
@@ -229,4 +240,34 @@ export class ChatBox implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
+
+  showEmojiPicker = signal(false);
+
+  // ... resto de signals igual ...
+
+
+  private cdr = inject(ChangeDetectorRef);
+  onEmojiClick(event: any): void {
+    const emoji = event.detail?.unicode ?? '';
+    this.content += emoji;
+    this.showEmojiPicker.set(false);
+    this.sendTyping();
+    this.cdr.detectChanges(); // fuerza actualización de la vista
+  }
+  closingEmojiPicker = signal(false);
+
+toggleEmojiPicker(): void {
+  if (this.showEmojiPicker()) {
+    this.closingEmojiPicker.set(true);
+    setTimeout(() => {
+      this.showEmojiPicker.set(false);
+      this.closingEmojiPicker.set(false);
+    }, 180); // debe coincidir con la duración de la animación de salida
+  } else {
+    this.showEmojiPicker.set(true);
+  }
+}
+
+
+
 }

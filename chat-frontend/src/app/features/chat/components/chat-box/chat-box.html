@@ -113,24 +113,27 @@
 
 
 
+<div class="input-area" style="position: relative;">
 
-        <div class="input-area">
+    <button type="button" class="emoji-toggle-btn" (click)="toggleEmojiPicker()">
+        😊
+    </button>
 
+    @if (showEmojiPicker()) {
+        <emoji-picker
+            class="emoji-picker-popup"
+            (emoji-click)="onEmojiClick($event)">
+        </emoji-picker>
+    }
 
-            <input [(ngModel)]="content" placeholder="Escribe un mensaje..." (input)="sendTyping()"
-                (keydown.enter)="send()">
+    <input [(ngModel)]="content" placeholder="Escribe un mensaje..." (input)="sendTyping()"
+        (keydown.enter)="send()">
 
+    <button (click)="send()" [disabled]="!content.trim()">
+        Enviar
+    </button>
 
-            <button (click)="send()" [disabled]="!content.trim()">
-
-
-                Enviar
-
-
-            </button>
-
-
-        </div>
+</div>
 
 
 
