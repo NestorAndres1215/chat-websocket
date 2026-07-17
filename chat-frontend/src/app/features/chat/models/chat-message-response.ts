@@ -1,0 +1,12 @@
+import { ReplyPreview } from './reply-preview';
+
+export interface ChatMessageResponse {
+  id: number;
+  userId: number;
+  username: string;
+  fullName: string;
+  recipientId: number;
+  content: string;
+  sentAt: string;
+  replyTo: ReplyPreview | null;
+}

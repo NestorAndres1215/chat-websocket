@@ -1,0 +1,44 @@
+<div class="page">
+
+    <h1>
+        Chat WebSocket
+    </h1>
+
+    <div class="tabs">
+        <button
+            type="button"
+            [class.active]="activeTab() === 'private'"
+            (click)="setTab('private')">
+            Privado
+        </button>
+        <button
+            type="button"
+            [class.active]="activeTab() === 'groups'"
+            (click)="setTab('groups')">
+            Grupos
+        </button>
+    </div>
+
+    @if (activeTab() === 'private') {
+
+        <div class="chat-container">
+            
+            <app-chat-box></app-chat-box>
+        </div>
+
+    } @else {
+
+        <div class="chat-container">
+            <app-group-list
+                [currentUserId]="currentUserId"
+                (selectGroup)="onSelectGroup($event)">
+            </app-group-list>
+            <app-group-chat
+                [group]="activeGroup()"
+                [currentUserId]="currentUserId">
+            </app-group-chat>
+        </div>
+
+    }
+
+</div>

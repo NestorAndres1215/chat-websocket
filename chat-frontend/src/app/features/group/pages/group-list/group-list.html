@@ -1,0 +1,43 @@
+<div class="group-list">
+
+    <div class="group-list-header">
+        <h3>Mis grupos</h3>
+        <button type="button" (click)="toggleCreateForm()">
+            {{ showCreateForm() ? 'Cancelar' : '+ Nuevo grupo' }}
+        </button>
+    </div>
+
+    @if (showCreateForm()) {
+        <div class="create-form">
+
+            <input
+                type="text"
+                [(ngModel)]="newGroupName"
+                placeholder="Nombre del grupo" />
+
+            <div class="member-picker">
+                @for (u of allUsers(); track u.id) {
+                    <label>
+                        <input
+                            type="checkbox"
+                            [checked]="isSelected(u.id)"
+                            (change)="toggleMember(u.id)" />
+                        {{ u.fullName }}
+                    </label>
+                }
+            </div>
+
+            <button type="button" (click)="createGroup()">Crear</button>
+
+        </div>
+    }
+
+    <div class="groups">
+        @for (g of groups(); track g.id) {
+            <button type="button" class="group-item" (click)="onSelectGroup(g)">
+                {{ g.name }}
+            </button>
+        }
+    </div>
+
+</div>

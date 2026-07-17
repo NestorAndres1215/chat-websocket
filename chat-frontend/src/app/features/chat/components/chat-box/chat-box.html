@@ -1,0 +1,65 @@
+<div class="chat-container">
+
+    @if (user) {
+        <div class="current-user-badge">
+            Conectado como: <strong>{{ user.fullName }}</strong> ({{ user.username }})
+        </div>
+    }
+
+    <div class="users-panel">
+
+        @for (u of onlineUsers(); track u.id) {
+            <button
+                type="button"
+                [class.active]="selectedRecipient()?.id === u.id"
+                (click)="selectRecipient(u)">
+                {{ u.fullName }}
+            </button>
+        }
+
+    </div>
+
+    <div class="chat-panel">
+
+        @if (!selectedRecipient()) {
+
+            <p class="empty-state">Selecciona un usuario para chatear.</p>
+
+        } @else {
+
+            <div class="messages">
+
+                @for (message of visibleMessages(); track message.id) {
+
+                    <app-message-item
+                        [message]="message"
+                        [currentUserId]="user?.id ?? 0"
+                        (reply)="startReply($event)">
+                    </app-message-item>
+
+                }
+
+            </div>
+
+            @if (replyingTo()) {
+                <div class="reply-bar">
+                    <span>Respondiendo a {{ replyingTo()?.username }}: {{ replyingTo()?.content }}</span>
+                    <button type="button" (click)="cancelReply()">✕</button>
+                </div>
+            }
+
+            <div class="input-area">
+
+                <input [(ngModel)]="content" placeholder="Escribe un mensaje..." (keydown.enter)="send()">
+
+                <button (click)="send()" [disabled]="!content.trim()">
+                    Enviar
+                </button>
+
+            </div>
+
+        }
+
+    </div>
+
+</div>

@@ -1,0 +1,29 @@
+<div class="user-list-panel">
+
+  <div class="panel-header">
+    <h3>Usuarios conectados</h3>
+    <span class="count-badge">{{ users().length }}</span>
+  </div>
+
+  <div class="user-list">
+    @for (user of users(); track user.id) {
+
+      <button type="button" class="user-item" (click)="openChat(user)">
+        <span class="avatar">
+          {{ user.username.charAt(0).toUpperCase() }}
+          <span class="status-dot"></span>
+        </span>
+        <span class="user-info">
+          <span class="username">{{ user.username }}</span>
+          <span class="status-label">En línea</span>
+        </span>
+      </button>
+
+    }
+
+    @if (users().length === 0) {
+      <p class="empty-state">No hay usuarios conectados</p>
+    }
+  </div>
+
+</div>

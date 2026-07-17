@@ -1,0 +1,78 @@
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #0b141a;
+  font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+/* ... el resto que ya tenías (h1, .tabs) queda igual ... */
+
+.chat-container {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background-color: #0b141a;
+  min-height: 0; /* clave: sin esto flex a veces no respeta el overflow */
+}
+
+h1 {
+  color: #e9edef;
+  font-size: 1.2rem;
+  font-weight: 600;
+  padding: 16px 24px;
+  margin: 0;
+  background-color: #202c33;
+  border-bottom: 1px solid #2a3942;
+}
+
+.tabs {
+  display: flex;
+  background-color: #202c33;
+  padding: 0 24px;
+  border-bottom: 1px solid #2a3942;
+}
+
+.tabs button {
+  border: none;
+  background: transparent;
+  color: #8696a0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 14px 20px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.tabs button:hover {
+  color: #e9edef;
+}
+
+.tabs button.active {
+  color: #00a884;
+}
+
+.tabs button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #00a884;
+  border-radius: 3px 3px 0 0;
+}
+
+.chat-container {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background-color: #0b141a;
+}

@@ -1,0 +1,35 @@
+@if (!group) {
+
+    <p class="empty-state">Selecciona un grupo para chatear.</p>
+
+} @else {
+
+    <div class="group-chat">
+
+        <h3>{{ group.name }}</h3>
+
+        <div class="messages">
+            @for (message of messages(); track message.id) {
+                <app-message-item
+                    [message]="message"
+                    [currentUserId]="currentUserId"
+                    (reply)="startReply($event)">
+                </app-message-item>
+            }
+        </div>
+
+        @if (replyingTo()) {
+            <div class="reply-bar">
+                <span>Respondiendo a {{ replyingTo()?.username }}: {{ replyingTo()?.content }}</span>
+                <button type="button" (click)="cancelReply()">✕</button>
+            </div>
+        }
+
+        <div class="input-area">
+            <input [(ngModel)]="content" placeholder="Escribe un mensaje..." (keydown.enter)="send()">
+            <button (click)="send()" [disabled]="!content.trim()">Enviar</button>
+        </div>
+
+    </div>
+
+}

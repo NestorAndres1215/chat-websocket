@@ -1,0 +1,21 @@
+<div class="chat-message" [class.own]="isOwn()">
+
+    <div class="header">
+        <strong>{{ message.username }}</strong>
+        <span>{{ message.sentAt | date:'short' }}</span>
+    </div>
+
+    @if (message.replyTo) {
+        <div class="reply-preview">
+            <strong>{{ message.replyTo.username }}</strong>
+            <span>{{ message.replyTo.content }}</span>
+        </div>
+    }
+
+    <p>{{ message.content }}</p>
+
+    <button type="button" class="reply-btn" (click)="onReply()">
+        Responder
+    </button>
+
+</div>
