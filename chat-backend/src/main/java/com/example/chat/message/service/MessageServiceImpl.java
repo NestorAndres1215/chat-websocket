@@ -5,14 +5,15 @@ import com.example.chat.message.dto.ChatMessageRequest;
 import com.example.chat.message.dto.ChatMessageResponse;
 import com.example.chat.message.dto.MessageResponse;
 import com.example.chat.message.entity.MessageEntity;
+import com.example.chat.message.enums.MessageStatus;
 import com.example.chat.message.mapper.MessageMapper;
 import com.example.chat.message.repository.MessageRepository;
 import com.example.chat.user.entity.UserEntity;
 import com.example.chat.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,45 +21,75 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
 
+
     private final MessageRepository messageRepository;
 
     private final UserRepository userRepository;
-
+    private final SimpMessagingTemplate messagingTemplate;
     private final MessageMapper mapper;
+
+
 
     @Override
     @Transactional
     public ChatMessageResponse send(ChatMessageRequest request) {
 
+
         UserEntity sender = userRepository.findById(request.getUserId())
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Usuario no encontrado."));
+                        new ResourceNotFoundException("Usuario no encontrado.")
+                );
+
 
         UserEntity recipient = userRepository.findById(request.getRecipientId())
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Destinatario no encontrado."));
+                        new ResourceNotFoundException("Destinatario no encontrado.")
+                );
+
+
 
         MessageEntity replyTo = null;
 
+
         if (request.getReplyToId() != null) {
+
             replyTo = messageRepository.findById(request.getReplyToId())
                     .orElseThrow(() ->
-                            new ResourceNotFoundException("Mensaje al que respondes no encontrado."));
+                            new ResourceNotFoundException("Mensaje al que respondes no encontrado.")
+                    );
+
         }
 
+
+
         MessageEntity entity = MessageEntity.builder()
+
                 .content(request.getContent())
+
                 .sentAt(LocalDateTime.now())
+
+                .status(MessageStatus.ENVIADO)
+
                 .user(sender)
+
                 .recipient(recipient)
+
                 .replyTo(replyTo)
+
                 .build();
 
+
+
         entity = messageRepository.save(entity);
+
+
 
         return mapper.toChatResponse(entity);
 
     }
+
+
+
 
     @Override
     @Transactional(readOnly = true)
@@ -71,25 +102,79 @@ public class MessageServiceImpl implements MessageService {
 
     }
 
+
+
+
+
     @Override
     @Transactional(readOnly = true)
     public MessageResponse findById(Long id) {
 
+
         MessageEntity entity = messageRepository.findById(id)
+
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Mensaje no encontrado."));
+                        new ResourceNotFoundException("Mensaje no encontrado.")
+                );
+
 
         return mapper.toResponse(entity);
 
     }
 
+
+
+
     @Transactional(readOnly = true)
     public List<MessageResponse> findConversation(Long userA, Long userB) {
 
+
         return messageRepository.findConversation(userA, userB)
+
                 .stream()
+
                 .map(mapper::toResponse)
+
                 .toList();
+
+    }
+
+    @Override
+    @Transactional
+    public void updateStatus(
+            Long senderId,
+            Long recipientId,
+            MessageStatus status
+    ) {
+
+
+        int updated = messageRepository.updateStatus(
+                senderId,
+                recipientId,
+                status
+        );
+
+
+        System.out.println(
+                "MENSAJES ACTUALIZADOS: " + updated
+        );
+
+
+
+        List<MessageEntity> messages =
+                messageRepository.findConversation(
+                        senderId,
+                        recipientId
+                );
+        messages.forEach(message -> {
+
+            ChatMessageResponse response =
+                    mapper.toChatResponse(message);
+
+            messagingTemplate.convertAndSend("/topic/messages", response);
+
+        });
+
 
     }
 

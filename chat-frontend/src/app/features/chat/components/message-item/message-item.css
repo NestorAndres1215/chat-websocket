@@ -91,3 +91,25 @@
   color: #00a884;
   text-decoration: underline;
 }
+
+.chat-message .status {
+  position: absolute;
+  bottom: 6px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  color: #8696a0;
+}
+
+.chat-message .status.read {
+  color: #53bdeb;
+}
+
+.check-icon {
+  width: 16px;
+  height: 15px;
+}
+
+.check-icon.double {
+  width: 18px;
+}

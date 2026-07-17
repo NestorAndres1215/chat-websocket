@@ -15,7 +15,9 @@ import { HttpClient } from '@angular/common/http';
 @Service()
 export class ChatService {
   private readonly http = inject(HttpClient);
+
   private readonly websocket = inject(WebsocketService);
+
   private readonly url = environment.apiUrl;
 
   connect(): void {
@@ -43,26 +45,33 @@ export class ChatService {
   }
 
   conversation(userA: number, userB: number): Observable<ChatMessageResponse[]> {
-    return this.http.get<ChatMessageResponse[]>(
-      `${this.url}/messages/conversation`,
-      { params: { userA, userB } }
-    );
+    return this.http.get<ChatMessageResponse[]>(`${this.url}/messages/conversation`, {
+      params: {
+        userA,
+        userB,
+      },
+    });
   }
 
+  typing(): Observable<any> {
+    return this.websocket.typing$;
+  }
 
-  typing() {
+  sendTyping(data: any): void {
+    this.websocket.send('/app/typing', data);
+  }
 
-  return this.websocket.typing$;
-
-}
-
-
-sendTyping(data:any){
-
-  this.websocket.send(
-    '/app/typing',
-    data
-  );
-
-}
+  markAsRead(senderId: number, recipientId: number): Observable<void> {
+    return this.http.put<void>(
+      `${this.url}/messages/status`,
+      {},
+      {
+        params: {
+          senderId,
+          recipientId,
+          status: 'LEIDO',
+        },
+      },
+    );
+  }
 }

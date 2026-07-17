@@ -5,17 +5,52 @@
         <span>{{ message.sentAt | date:'short' }}</span>
     </div>
 
+
     @if (message.replyTo) {
+
         <div class="reply-preview">
             <strong>{{ message.replyTo.username }}</strong>
             <span>{{ message.replyTo.content }}</span>
+            <span >{{ message.status }}</span>
         </div>
+
     }
+
 
     <p>{{ message.content }}</p>
 
-    <button type="button" class="reply-btn" (click)="onReply()">
+
+   @if (isOwn()) {
+    <span class="status" [class.read]="message.status === 'LEIDO'">
+        @switch (message.status) {
+            @case ('ENVIADO') {
+                <svg viewBox="0 0 16 15" class="check-icon">
+                    <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z" fill="currentColor"/>
+                </svg>
+            }
+            @case ('ENTREGADO') {
+                <svg viewBox="0 0 16 15" class="check-icon double">
+                    <path d="M11.071.653a.457.457 0 0 0-.304-.102.493.493 0 0 0-.398.201l-6.283 8.06-2.6-2.475a.463.463 0 0 0-.339-.125.446.446 0 0 0-.328.152l-.435.492a.531.531 0 0 0-.13.396.53.53 0 0 0 .176.38l3.292 3.128c.135.13.324.2.518.2.194 0 .383-.07.518-.2l6.987-8.955a.512.512 0 0 0-.093-.702l-.481-.372z" fill="currentColor"/>
+                    <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z" fill="currentColor"/>
+                </svg>
+            }
+            @case ('LEIDO') {
+                <svg viewBox="0 0 16 15" class="check-icon double">
+                    <path d="M11.071.653a.457.457 0 0 0-.304-.102.493.493 0 0 0-.398.201l-6.283 8.06-2.6-2.475a.463.463 0 0 0-.339-.125.446.446 0 0 0-.328.152l-.435.492a.531.531 0 0 0-.13.396.53.53 0 0 0 .176.38l3.292 3.128c.135.13.324.2.518.2.194 0 .383-.07.518-.2l6.987-8.955a.512.512 0 0 0-.093-.702l-.481-.372z" fill="currentColor"/>
+                    <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z" fill="currentColor"/>
+                </svg>
+            }
+        }
+    </span>
+}
+
+
+    <button 
+        type="button" 
+        class="reply-btn" 
+        (click)="onReply()">
         Responder
     </button>
+
 
 </div>

@@ -10,13 +10,9 @@ import { DisplayableMessage } from '../../models/displayable-message.model';
 
 @Component({
   selector: 'app-group-chat',
-
   standalone: true,
-
   imports: [FormsModule, MessageItem],
-
   templateUrl: './group-chat.html',
-
   styleUrl: './group-chat.css',
 })
 export class GroupChat implements OnChanges, OnDestroy {
@@ -27,7 +23,7 @@ export class GroupChat implements OnChanges, OnDestroy {
 
   @Input({ required: true }) currentUserId!: number;
 
-  messages = signal<GroupMessageResponse[]>([]);
+  messages = signal<DisplayableMessage[]>([]);
 
   replyingTo = signal<DisplayableMessage | null>(null);
 
@@ -57,10 +53,13 @@ export class GroupChat implements OnChanges, OnDestroy {
   }
 
   ngOnDestroy(): void {
+
     if (this.activeGroupId !== null) {
       this.groupService.stopListening(this.activeGroupId);
     }
+
     this.liveSubscription?.unsubscribe();
+
   }
 
   private loadHistory(): void {
@@ -70,8 +69,17 @@ export class GroupChat implements OnChanges, OnDestroy {
     }
 
     this.groupService.history(this.group.id).subscribe({
-      next: (history) => this.messages.set(history),
-      error: (err) => console.error(err),
+
+      next: (history) => {
+
+        this.messages.set(
+          history.map(m => this.toDisplayableMessage(m))
+        );
+
+      },
+
+      error: err => console.error(err)
+
     });
 
   }
@@ -83,12 +91,41 @@ export class GroupChat implements OnChanges, OnDestroy {
     }
 
     this.liveSubscription = this.groupService.listen(this.group.id).subscribe({
+
       next: (message) => {
-        this.messages.update((current) => [...current, message]);
-      },
+
+        this.messages.update(current => [
+          ...current,
+          this.toDisplayableMessage(message)
+        ]);
+
+      }
+
     });
 
   }
+
+private toDisplayableMessage(message: GroupMessageResponse): DisplayableMessage {
+
+  return {
+
+    id: message.id,
+
+    userId: message.userId,
+
+    username: message.username,
+
+    fullName: message.fullName,
+
+    content: message.content,
+
+    sentAt: message.sentAt,
+
+    replyTo: message.replyTo
+
+  };
+
+}
 
   startReply(message: DisplayableMessage): void {
     this.replyingTo.set(message);

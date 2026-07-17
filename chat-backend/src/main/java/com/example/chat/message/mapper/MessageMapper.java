@@ -18,11 +18,14 @@ public class MessageMapper {
                 .fullName(entity.getUser().getFullName())
                 .recipientId(entity.getRecipient().getId())
                 .content(entity.getContent())
+                .status(entity.getStatus().name())
                 .sentAt(entity.getSentAt())
                 .replyTo(toReplyPreview(entity.getReplyTo()))
                 .build();
 
     }
+
+
 
     public MessageResponse toResponse(MessageEntity entity) {
 
@@ -33,17 +36,21 @@ public class MessageMapper {
                 .fullName(entity.getUser().getFullName())
                 .recipientId(entity.getRecipient().getId())
                 .content(entity.getContent())
+                .status(entity.getStatus().name())
                 .sentAt(entity.getSentAt())
                 .replyTo(toReplyPreview(entity.getReplyTo()))
                 .build();
 
     }
 
+
+
     private ReplyPreview toReplyPreview(MessageEntity replyTo) {
 
         if (replyTo == null) {
             return null;
         }
+
 
         return ReplyPreview.builder()
                 .id(replyTo.getId())

@@ -56,15 +56,9 @@ export class WebsocketService {
       this.messageSubject.next(body);
     });
 
-    this.client.subscribe('/user/queue/messages', (message: IMessage) => {
-      const body: ChatMessageResponse = JSON.parse(message.body);
 
-      this.messageSubject.next(body);
-    });
 
-    this.client.subscribe('/user/queue/errors', (message: IMessage) => {
-      this.errorSubject.next(message.body);
-    });
+
   }
 
   private subscribeTyping(): void {

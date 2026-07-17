@@ -16,7 +16,7 @@ public class ChatMessageResponse {
     private String username;
 
     private String fullName;
-
+    private String status;
     private Long recipientId;
 
     private LocalDateTime sentAt;

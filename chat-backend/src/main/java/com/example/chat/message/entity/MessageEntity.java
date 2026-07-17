@@ -1,5 +1,6 @@
 package com.example.chat.message.entity;
 
+import com.example.chat.message.enums.MessageStatus;
 import com.example.chat.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,6 +25,10 @@ public class MessageEntity {
 
     @Column(name = "sent_at", nullable = false)
     private LocalDateTime sentAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MessageStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
