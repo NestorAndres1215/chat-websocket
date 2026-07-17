@@ -459,3 +459,107 @@
 .send-fab:hover {
   background-color: #06cf9c;
 }
+
+.pinned-bar {
+  background: #202c33;
+  border-bottom: 1px solid #2a3942;
+}
+
+.pinned-bar-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+}
+
+.pinned-bar-header:hover {
+  background: #182229;
+}
+
+.pinned-pin-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: #8696a0;
+}
+
+.pinned-file-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: #8696a0;
+}
+
+.pinned-text {
+  font-weight: 600;
+  color: #e9edef;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.pinned-count {
+  flex-shrink: 0;
+  background: #2a3942;
+  color: #8696a0;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+.pinned-chevron-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #8696a0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.pinned-chevron-btn svg {
+  transition: transform 0.2s ease;
+}
+
+.pinned-chevron-btn svg.rotated {
+  transform: rotate(180deg);
+}
+
+.pinned-bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 8px 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.pinned-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #111b21;
+  border: 1px solid #2a3942;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pinned-item:hover {
+  background: #182229;
+  border-color: #384952;
+}

@@ -238,67 +238,75 @@ export class MessageItem {
     this.closeReactionPicker();
   }
 
-reactionPickerPosition = signal({ top: 0, left: 0, width: 320, height: 400 });
+  reactionPickerPosition = signal({ top: 0, left: 0, width: 320, height: 400 });
   openReactionPickerFromMenu(event: MouseEvent): void {
     this.closeMenu();
     this.setReactionPickerPosition(event);
     this.showReactionPicker.set(true);
   }
-private setReactionPickerPosition(event: MouseEvent): void {
-  const target = event.currentTarget as HTMLElement;
-  const rect = target.getBoundingClientRect();
+  private setReactionPickerPosition(event: MouseEvent): void {
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
 
-  const minWidth = 320;
-  const maxWidth = 420;
-  const maxHeight = 400;
-  const minHeight = 280;
-  const margin = 12;
+    const minWidth = 320;
+    const maxWidth = 420;
+    const maxHeight = 400;
+    const minHeight = 280;
+    const margin = 12;
 
-  // --- ancho ---
-  const spaceRight = window.innerWidth - rect.left - margin;
-  const spaceLeft = rect.right - margin;
+    // --- ancho ---
+    const spaceRight = window.innerWidth - rect.left - margin;
+    const spaceLeft = rect.right - margin;
 
-  let width: number;
-  let left: number;
+    let width: number;
+    let left: number;
 
-  if (spaceRight >= minWidth) {
-    width = Math.min(maxWidth, spaceRight);
-    left = rect.left;
-  } else if (spaceLeft >= minWidth) {
-    width = Math.min(maxWidth, spaceLeft);
-    left = rect.right - width;
-  } else {
-    width = Math.max(spaceRight, spaceLeft, 260);
-    left = spaceRight >= spaceLeft ? rect.left : margin;
-  }
-
-  // --- alto: elegimos abrir hacia abajo o hacia arriba según dónde haya más lugar ---
-  const spaceBelow = window.innerHeight - rect.bottom - margin;
-  const spaceAbove = rect.top - margin;
-
-  let height: number;
-  let top: number;
-
-  if (spaceBelow >= minHeight || spaceBelow >= spaceAbove) {
-    // abre hacia abajo, recortando la altura al espacio real disponible
-    height = Math.max(minHeight, Math.min(maxHeight, spaceBelow));
-    top = rect.bottom + 8;
-
-    // por si acaso se pasa igual, lo clampeamos contra el borde inferior
-    if (top + height > window.innerHeight - margin) {
-      height = window.innerHeight - margin - top;
+    if (spaceRight >= minWidth) {
+      width = Math.min(maxWidth, spaceRight);
+      left = rect.left;
+    } else if (spaceLeft >= minWidth) {
+      width = Math.min(maxWidth, spaceLeft);
+      left = rect.right - width;
+    } else {
+      width = Math.max(spaceRight, spaceLeft, 260);
+      left = spaceRight >= spaceLeft ? rect.left : margin;
     }
-  } else {
-    // abre hacia arriba
-    height = Math.max(minHeight, Math.min(maxHeight, spaceAbove));
-    top = rect.top - height - 8;
 
-    if (top < margin) {
-      top = margin;
-      height = rect.top - margin - 8;
+    // --- alto: elegimos abrir hacia abajo o hacia arriba según dónde haya más lugar ---
+    const spaceBelow = window.innerHeight - rect.bottom - margin;
+    const spaceAbove = rect.top - margin;
+
+    let height: number;
+    let top: number;
+
+    if (spaceBelow >= minHeight || spaceBelow >= spaceAbove) {
+      // abre hacia abajo, recortando la altura al espacio real disponible
+      height = Math.max(minHeight, Math.min(maxHeight, spaceBelow));
+      top = rect.bottom + 8;
+
+      // por si acaso se pasa igual, lo clampeamos contra el borde inferior
+      if (top + height > window.innerHeight - margin) {
+        height = window.innerHeight - margin - top;
+      }
+    } else {
+      // abre hacia arriba
+      height = Math.max(minHeight, Math.min(maxHeight, spaceAbove));
+      top = rect.top - height - 8;
+
+      if (top < margin) {
+        top = margin;
+        height = rect.top - margin - 8;
+      }
     }
-  }
 
-  this.reactionPickerPosition.set({ top, left, width, height });
-}
+    this.reactionPickerPosition.set({ top, left, width, height });
+  }
+  togglePin(): void {
+    this.closeMenu();
+    this.chatService.togglePin(this.message.id, this.currentUserId).subscribe({
+      error: (error) => {
+        console.error('Error fijando mensaje', error);
+      },
+    });
+  }
 }

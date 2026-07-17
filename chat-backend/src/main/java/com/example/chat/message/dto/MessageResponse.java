@@ -30,4 +30,7 @@ public class MessageResponse {
     private LocalDateTime editedAt;
     private Boolean deleted;
     private List<ReactionSummary> reactions;
+
+    private Boolean pinned;
+    private LocalDateTime pinnedAt;
 }

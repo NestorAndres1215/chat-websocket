@@ -23,4 +23,6 @@ public interface MessageService {
 
     ChatMessageResponse deleteMessage(Long messageId, Long userId);
     ChatMessageResponse react(Long messageId, ReactionRequest request);
+    ChatMessageResponse togglePin(Long messageId, Long userId);
+    List<ChatMessageResponse> getPinned(Long userA, Long userB);
 }

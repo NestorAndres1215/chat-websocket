@@ -44,4 +44,13 @@ AND m.status <> :status
             @Param("recipientId") Long recipientId,
             @Param("status") MessageStatus status
     );
+
+    @Query("""
+    SELECT m FROM MessageEntity m
+    WHERE m.pinned = true
+    AND ((m.user.id = :userA AND m.recipient.id = :userB)
+      OR (m.user.id = :userB AND m.recipient.id = :userA))
+    ORDER BY m.pinnedAt DESC
+""")
+    List<MessageEntity> findPinnedByConversation(@Param("userA") Long userA, @Param("userB") Long userB);
 }

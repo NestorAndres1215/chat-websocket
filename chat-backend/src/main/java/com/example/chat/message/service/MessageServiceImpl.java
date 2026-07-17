@@ -251,4 +251,35 @@ public class MessageServiceImpl implements MessageService {
 
         return response;
     }
+
+    @Override
+    @Transactional
+    public ChatMessageResponse togglePin(Long messageId, Long userId) {
+
+        MessageEntity message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Mensaje no encontrado."));
+
+        boolean newValue = !Boolean.TRUE.equals(message.getPinned());
+
+        message.setPinned(newValue);
+        message.setPinnedAt(newValue ? LocalDateTime.now() : null);
+
+        messageRepository.save(message);
+
+        ChatMessageResponse response = mapper.toChatResponse(message);
+
+        // avisamos por websocket para que se actualice en tiempo real en ambos lados
+        messagingTemplate.convertAndSend("/topic/messages", response);
+
+        return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ChatMessageResponse> getPinned(Long userA, Long userB) {
+        return messageRepository.findPinnedByConversation(userA, userB)
+                .stream()
+                .map(mapper::toChatResponse)
+                .toList();
+    }
 }

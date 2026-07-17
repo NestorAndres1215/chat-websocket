@@ -44,6 +44,9 @@ public class MessageMapper {
                 .editedAt(entity.getEditedAt())
                 .deleted(entity.getDeleted())
 
+                .pinned(entity.getPinned())
+                .pinnedAt(entity.getPinnedAt())
+
                 .reactions(toReactionSummaries(entity.getId()))
                 .build();
 
@@ -73,6 +76,9 @@ public class MessageMapper {
                 .edited(entity.getEdited())
                 .editedAt(entity.getEditedAt())
                 .deleted(entity.getDeleted())
+
+                .pinned(entity.getPinned())
+                .pinnedAt(entity.getPinnedAt())
 
                 .reactions(toReactionSummaries(entity.getId()))
                 .build();

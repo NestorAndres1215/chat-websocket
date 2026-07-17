@@ -76,4 +76,21 @@ public class MessageController {
     ) {
         return ResponseEntity.ok(messageService.react(id, request));
     }
+
+
+    @PutMapping("/{id}/pin")
+    public ResponseEntity<ChatMessageResponse> pin(
+            @PathVariable Long id,
+            @RequestParam Long userId
+    ) {
+        return ResponseEntity.ok(messageService.togglePin(id, userId));
+    }
+
+    @GetMapping("/pinned")
+    public ResponseEntity<List<ChatMessageResponse>> getPinned(
+            @RequestParam Long userA,
+            @RequestParam Long userB
+    ) {
+        return ResponseEntity.ok(messageService.getPinned(userA, userB));
+    }
 }

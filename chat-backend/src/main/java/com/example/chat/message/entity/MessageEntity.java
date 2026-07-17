@@ -67,4 +67,9 @@ public class MessageEntity {
     @Column(nullable = false)
     private Boolean deleted = false;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean pinned = false;
+
+    private LocalDateTime pinnedAt;
 }

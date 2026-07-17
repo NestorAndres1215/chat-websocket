@@ -43,13 +43,86 @@
 
         } @else {
 
+        @if (pinnedMessages().length > 0) {
+
+        <div class="pinned-bar">
+
+            <button type="button" class="pinned-bar-header" (click)="scrollToMessage(pinnedMessages()[0].id)">
+
+                <svg class="pinned-pin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2l1.5 5.5L19 9l-4 3.5L16 18l-4-3-4 3 1-5.5L5 9l5.5-1.5L12 2z" stroke="currentColor"
+                        stroke-width="1.5" stroke-linejoin="round" />
+                </svg>
+
+                @if (pinnedMessages()[0].fileUrl) {
+                <svg class="pinned-file-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor"
+                        stroke-width="1.5" />
+                    <path d="M14 2v5h5" stroke="currentColor" stroke-width="1.5" />
+                </svg>
+                }
+
+                <span class="pinned-text">
+                    {{ pinnedMessages()[0].content || pinnedMessages()[0].fileName }}
+                </span>
+
+                @if (pinnedMessages().length > 1) {
+                <span class="pinned-count">{{ pinnedMessages().length }}</span>
+                }
+
+                <button type="button" class="pinned-chevron-btn"
+                    (click)="$event.stopPropagation(); togglePinnedExpanded()">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        [class.rotated]="pinnedExpanded()">
+                        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </button>
+
+            </button>
+
+            @if (pinnedExpanded()) {
+
+            <div class="pinned-bar-list">
+                @for (pm of pinnedMessages(); track pm.id) {
+                <button type="button" class="pinned-item" (click)="scrollToMessage(pm.id)">
+
+                    <svg class="pinned-pin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2l1.5 5.5L19 9l-4 3.5L16 18l-4-3-4 3 1-5.5L5 9l5.5-1.5L12 2z" stroke="currentColor"
+                            stroke-width="1.5" stroke-linejoin="round" />
+                    </svg>
+
+                    @if (pm.fileUrl) {
+                    <svg class="pinned-file-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor"
+                            stroke-width="1.5" />
+                        <path d="M14 2v5h5" stroke="currentColor" stroke-width="1.5" />
+                    </svg>
+                    }
+
+                    <span class="pinned-text">
+                        {{ pm.content || pm.fileName }}
+                    </span>
+
+                </button>
+                }
+            </div>
+
+            }
+
+        </div>
+
+        }
+
 
         <div class="messages">
 
             @for (message of visibleMessages(); track message.id) {
 
-            <app-message-item [message]="message" [currentUserId]="user?.id ?? 0" (reply)="startReply($event)">
-            </app-message-item>
+            <div [id]="'message-' + message.id">
+                <app-message-item [message]="message" [currentUserId]="user?.id ?? 0" (reply)="startReply($event)">
+                </app-message-item>
+            </div>
 
             }
 

@@ -4,6 +4,10 @@
         <strong>{{ message.username }}</strong>
 
         <div class="header-right">
+            @if (message.pinned && !isDeleted()) {
+            <span class="pinned-label">📌</span>
+            }
+
             @if (message.edited && !isDeleted()) {
             <span class="edited-label">Editado</span>
             }
@@ -35,6 +39,7 @@
             </svg>
             <span>Responder</span>
         </button>
+
         <button type="button" (click)="openReactionPickerFromMenu($event)">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
@@ -43,6 +48,15 @@
                     stroke-linecap="round" />
             </svg>
             <span>Reaccionar</span>
+        </button>
+
+        <button type="button" (click)="togglePin()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2l1.5 5.5L19 9l-4 3.5L16 18l-4-3-4 3 1-5.5L5 9l5.5-1.5L12 2z"
+                    [attr.fill]="message.pinned ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.5"
+                    stroke-linejoin="round" />
+            </svg>
+            <span>{{ message.pinned ? 'Desfijar' : 'Fijar' }}</span>
         </button>
 
         @if (isOwn()) {
@@ -256,6 +270,5 @@
         }
     </span>
     }
-
 
 </div>

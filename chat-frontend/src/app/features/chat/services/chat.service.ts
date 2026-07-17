@@ -95,9 +95,23 @@ export class ChatService {
   }
 
   react(messageId: number, userId: number, emoji: string): Observable<ChatMessageResponse> {
-  return this.http.post<ChatMessageResponse>(`${this.url}/messages/${messageId}/reactions`, {
-    userId,
-    emoji,
-  });
-}
+    return this.http.post<ChatMessageResponse>(`${this.url}/messages/${messageId}/reactions`, {
+      userId,
+      emoji,
+    });
+  }
+
+  togglePin(messageId: number, userId: number): Observable<ChatMessageResponse> {
+    return this.http.put<ChatMessageResponse>(
+      `${this.url}/messages/${messageId}/pin`,
+      {},
+      { params: { userId } },
+    );
+  }
+
+  getPinned(userA: number, userB: number): Observable<ChatMessageResponse[]> {
+    return this.http.get<ChatMessageResponse[]>(`${this.url}/messages/pinned`, {
+      params: { userA, userB },
+    });
+  }
 }

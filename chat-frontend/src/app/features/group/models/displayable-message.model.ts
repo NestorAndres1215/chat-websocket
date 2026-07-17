@@ -19,4 +19,6 @@ export interface DisplayableMessage {
   editedAt?: string;
   deleted?: boolean;
   reactions?: ReactionSummary[];
+    pinned?: boolean;
+  pinnedAt?: string;
 }

@@ -26,9 +26,17 @@ export interface ChatMessageResponse {
 
   replyTo: ReplyPreview | null;
 
+  fileUrl?: string;
+  fileName?: string;
+  fileSize?: number;
+  type?: string;
+
   edited?: boolean;
   editedAt?: string;
   deleted?: boolean;
 
   reactions?: ReactionSummary[];
+
+  pinned?: boolean;
+  pinnedAt?: string;
 }

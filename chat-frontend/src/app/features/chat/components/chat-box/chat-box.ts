@@ -96,6 +96,18 @@ export class ChatBox implements OnInit, OnDestroy {
           return [...current, message];
         });
 
+        // mantener sincronizada la lista de fijados en tiempo real
+        if (this.isPartOfCurrentConversation(message)) {
+          this.pinnedMessages.update((current) => {
+            const withoutThis = current.filter((m) => m.id !== message.id);
+            return message.pinned
+              ? [message, ...withoutThis].sort((a, b) =>
+                  (b.pinnedAt ?? '').localeCompare(a.pinnedAt ?? ''),
+                )
+              : withoutThis;
+          });
+        }
+
         if (
           this.user &&
           message.recipientId === this.user.id &&
@@ -143,9 +155,10 @@ export class ChatBox implements OnInit, OnDestroy {
   }
 
   selectRecipient(recipient: UserModel): void {
-    this.selectedRecipient.set(recipient);
-    this.replyingTo.set(null);
-
+  this.selectedRecipient.set(recipient);
+  this.replyingTo.set(null);
+  this.loadPinned();
+  this.pinnedExpanded.set(false);
     if (!this.user) {
       return;
     }
@@ -348,4 +361,42 @@ export class ChatBox implements OnInit, OnDestroy {
     if (size < 1024 * 1024) return `${(size / 1024).toFixed(0)} kB`;
     return `${(size / (1024 * 1024)).toFixed(1)} MB`;
   });
+
+  // --- Mensajes fijados ---
+
+  pinnedMessages = signal<ChatMessageResponse[]>([]);
+
+  private loadPinned(): void {
+    const recipient = this.selectedRecipient();
+    if (!this.user || !recipient) return;
+
+    this.chatService.getPinned(this.user.id, recipient.id).subscribe((pinned) => {
+      this.pinnedMessages.set(pinned);
+    });
+  }
+
+  private isPartOfCurrentConversation(message: ChatMessageResponse): boolean {
+    const recipient = this.selectedRecipient();
+    const me = this.user?.id ?? 0;
+    if (!recipient) return false;
+    return (
+      (message.userId === me && message.recipientId === recipient.id) ||
+      (message.userId === recipient.id && message.recipientId === me)
+    );
+  }
+
+  scrollToMessage(messageId: number): void {
+    const el = document.getElementById(`message-${messageId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('highlight');
+      setTimeout(() => el.classList.remove('highlight'), 1500);
+    }
+  }
+
+  pinnedExpanded = signal(false);
+
+togglePinnedExpanded(): void {
+  this.pinnedExpanded.update((v) => !v);
+}
 }
