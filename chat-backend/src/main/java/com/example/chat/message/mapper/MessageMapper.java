@@ -2,12 +2,23 @@ package com.example.chat.message.mapper;
 
 import com.example.chat.message.dto.ChatMessageResponse;
 import com.example.chat.message.dto.MessageResponse;
+import com.example.chat.message.dto.ReactionSummary;
 import com.example.chat.message.dto.ReplyPreview;
 import com.example.chat.message.entity.MessageEntity;
+import com.example.chat.message.entity.MessageReactionEntity;
+import com.example.chat.message.repository.MessageReactionRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Component
+@RequiredArgsConstructor
 public class MessageMapper {
+
+    private final MessageReactionRepository reactionRepository;
 
 
     public ChatMessageResponse toChatResponse(MessageEntity entity) {
@@ -32,6 +43,8 @@ public class MessageMapper {
                 .edited(entity.getEdited())
                 .editedAt(entity.getEditedAt())
                 .deleted(entity.getDeleted())
+
+                .reactions(toReactionSummaries(entity.getId()))
                 .build();
 
     }
@@ -60,9 +73,12 @@ public class MessageMapper {
                 .edited(entity.getEdited())
                 .editedAt(entity.getEditedAt())
                 .deleted(entity.getDeleted())
+
+                .reactions(toReactionSummaries(entity.getId()))
                 .build();
 
     }
+
 
 
     private ReplyPreview toReplyPreview(MessageEntity replyTo) {
@@ -81,4 +97,30 @@ public class MessageMapper {
                 .build();
 
     }
+
+
+
+    private List<ReactionSummary> toReactionSummaries(Long messageId) {
+
+        List<MessageReactionEntity> reactions = reactionRepository.findByMessageId(messageId);
+
+        if (reactions.isEmpty()) {
+            return List.of();
+        }
+
+        Map<String, List<MessageReactionEntity>> grouped = reactions.stream()
+                .collect(Collectors.groupingBy(MessageReactionEntity::getEmoji));
+
+        return grouped.entrySet().stream()
+                .map(entry -> ReactionSummary.builder()
+                        .emoji(entry.getKey())
+                        .count(entry.getValue().size())
+                        .userIds(entry.getValue().stream()
+                                .map(r -> r.getUser().getId())
+                                .collect(Collectors.toList()))
+                        .build())
+                .collect(Collectors.toList());
+
+    }
+
 }

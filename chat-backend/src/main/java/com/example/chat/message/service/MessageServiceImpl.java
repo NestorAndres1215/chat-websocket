@@ -2,14 +2,13 @@ package com.example.chat.message.service;
 
 import com.example.chat.exception.ForbiddenOperationException;
 import com.example.chat.exception.ResourceNotFoundException;
-import com.example.chat.message.dto.ChatMessageRequest;
-import com.example.chat.message.dto.ChatMessageResponse;
-import com.example.chat.message.dto.EditMessageRequest;
-import com.example.chat.message.dto.MessageResponse;
+import com.example.chat.message.dto.*;
 import com.example.chat.message.entity.MessageEntity;
+import com.example.chat.message.entity.MessageReactionEntity;
 import com.example.chat.message.enums.MessageStatus;
 import com.example.chat.message.enums.MessageType;
 import com.example.chat.message.mapper.MessageMapper;
+import com.example.chat.message.repository.MessageReactionRepository;
 import com.example.chat.message.repository.MessageRepository;
 import com.example.chat.user.entity.UserEntity;
 import com.example.chat.user.repository.UserRepository;
@@ -42,6 +41,8 @@ public class MessageServiceImpl implements MessageService {
     private final SimpMessagingTemplate messagingTemplate;
 
     private final MessageMapper mapper;
+
+    private final MessageReactionRepository messageReactionRepository;
 
     @Override
     @Transactional
@@ -208,6 +209,43 @@ public class MessageServiceImpl implements MessageService {
         MessageEntity saved = messageRepository.save(message);
 
         ChatMessageResponse response = mapper.toChatResponse(saved);
+
+        messagingTemplate.convertAndSend("/topic/messages", response);
+
+        return response;
+    }
+
+
+    @Override
+    @Transactional
+    public ChatMessageResponse react(Long messageId, ReactionRequest request) {
+
+        MessageEntity message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Mensaje no encontrado."));
+
+        UserEntity user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
+
+        var existing = messageReactionRepository.findByMessageIdAndUserId(messageId, request.getUserId());
+
+        if (existing.isPresent() && existing.get().getEmoji().equals(request.getEmoji())) {
+            // Mismo emoji que ya tenía -> quitar reacción (toggle off)
+            messageReactionRepository.delete(existing.get());
+        } else if (existing.isPresent()) {
+            // Emoji distinto -> reemplazar
+            existing.get().setEmoji(request.getEmoji());
+            messageReactionRepository.save(existing.get());
+        } else {
+            // Nueva reacción
+            MessageReactionEntity reaction = MessageReactionEntity.builder()
+                    .message(message)
+                    .user(user)
+                    .emoji(request.getEmoji())
+                    .build();
+            messageReactionRepository.save(reaction);
+        }
+
+        ChatMessageResponse response = mapper.toChatResponse(message);
 
         messagingTemplate.convertAndSend("/topic/messages", response);
 

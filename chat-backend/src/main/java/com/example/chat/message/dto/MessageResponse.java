@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -28,5 +29,5 @@ public class MessageResponse {
     private Boolean edited;
     private LocalDateTime editedAt;
     private Boolean deleted;
-
+    private List<ReactionSummary> reactions;
 }

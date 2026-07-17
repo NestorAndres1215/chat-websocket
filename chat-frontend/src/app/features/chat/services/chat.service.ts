@@ -93,4 +93,11 @@ export class ChatService {
       params: { userId },
     });
   }
+
+  react(messageId: number, userId: number, emoji: string): Observable<ChatMessageResponse> {
+  return this.http.post<ChatMessageResponse>(`${this.url}/messages/${messageId}/reactions`, {
+    userId,
+    emoji,
+  });
+}
 }

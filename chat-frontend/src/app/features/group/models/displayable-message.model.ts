@@ -1,4 +1,5 @@
 import { ReplyPreview } from '../../chat/models/reply-preview';
+import { ReactionSummary } from '../../chat/models/chat-message-response';
 
 export interface DisplayableMessage {
   id: number;
@@ -17,4 +18,5 @@ export interface DisplayableMessage {
   edited?: boolean;
   editedAt?: string;
   deleted?: boolean;
+  reactions?: ReactionSummary[];
 }

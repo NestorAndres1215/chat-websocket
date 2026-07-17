@@ -35,6 +35,15 @@
             </svg>
             <span>Responder</span>
         </button>
+        <button type="button" (click)="openReactionPickerFromMenu($event)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
+                <path d="M8.5 10.5h.01M15.5 10.5h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                <path d="M8 14.5c1 1.2 2.3 1.8 4 1.8s3-.6 4-1.8" stroke="currentColor" stroke-width="1.6"
+                    stroke-linecap="round" />
+            </svg>
+            <span>Reaccionar</span>
+        </button>
 
         @if (isOwn()) {
 
@@ -61,8 +70,19 @@
 
     }
 
+    @if (showReactionPicker()) {
 
-@if (message.replyTo && !isDeleted()) {
+    <div class="reaction-picker-backdrop" (click)="closeReactionPicker()"></div>
+
+    <emoji-picker class="reaction-picker-popup" [style.top.px]="reactionPickerPosition().top"
+        [style.left.px]="reactionPickerPosition().left" [style.width.px]="reactionPickerPosition().width"
+        [style.height.px]="reactionPickerPosition().height" (emoji-click)="onReactionEmojiClick($event)">
+    </emoji-picker>
+
+    }
+
+
+    @if (message.replyTo && !isDeleted()) {
 
     <div class="reply-preview">
         <strong>{{ message.replyTo.username }}</strong>
@@ -71,11 +91,11 @@
 
             @if (replyHasFile()) {
 
-                @if (replyIsImage()) {
-                    <img [src]="replyFullFileUrl()" alt="preview" class="reply-thumb" />
-                } @else {
-                    <span class="reply-file-icon">📎</span>
-                }
+            @if (replyIsImage()) {
+            <img [src]="replyFullFileUrl()" alt="preview" class="reply-thumb" />
+            } @else {
+            <span class="reply-file-icon">📎</span>
+            }
 
             }
 
@@ -86,7 +106,7 @@
         </div>
     </div>
 
-}
+    }
 
 
     @if (isDeleted()) {
@@ -185,6 +205,18 @@
         {{ message.content }}
 
     </p>
+
+    }
+
+    @if (reactions().length > 0) {
+
+    <div class="reactions-bar">
+        @for (r of reactions(); track r.emoji) {
+        <button type="button" class="reaction-pill" [class.mine]="r.reactedByMe" (click)="react(r.emoji)">
+            {{ r.emoji }} {{ r.count }}
+        </button>
+        }
+    </div>
 
     }
 

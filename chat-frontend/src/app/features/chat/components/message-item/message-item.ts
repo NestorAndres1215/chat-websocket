@@ -1,11 +1,20 @@
-import { Component, computed, EventEmitter, Input, Output, signal, inject } from '@angular/core';
+import {
+  Component,
+  computed,
+  EventEmitter,
+  Input,
+  Output,
+  signal,
+  inject,
+  CUSTOM_ELEMENTS_SCHEMA,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { DisplayableMessage } from '../../../group/models/displayable-message.model';
 import { environment } from '../../../../core/config/environment';
 import { ChatService } from '../../services/chat.service';
-
+import 'emoji-picker-element';
 type FileKind = 'image' | 'pdf' | 'word' | 'excel' | 'generic';
 
 @Component({
@@ -14,6 +23,7 @@ type FileKind = 'image' | 'pdf' | 'word' | 'excel' | 'generic';
   imports: [CommonModule, FormsModule],
   templateUrl: './message-item.html',
   styleUrl: './message-item.css',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class MessageItem {
   private readonly chatService = inject(ChatService);
@@ -192,4 +202,103 @@ export class MessageItem {
     const baseHost = environment.apiUrl.replace(/\/api\/?$/, '');
     return `${baseHost}${url}`;
   });
+
+  // --- Reacciones ---
+
+  showReactionPicker = signal(false);
+
+  toggleReactionPicker(): void {
+    this.showReactionPicker.update((v) => !v);
+  }
+
+  closeReactionPicker(): void {
+    this.showReactionPicker.set(false);
+  }
+
+  reactions = computed(() => {
+    const list = this.message.reactions ?? [];
+    return list.map((r) => ({
+      ...r,
+      reactedByMe: r.userIds.includes(this.currentUserId),
+    }));
+  });
+
+  onReactionEmojiClick(event: any): void {
+    const emoji = event.detail?.unicode ?? '';
+    if (!emoji) return;
+    this.react(emoji);
+  }
+
+  react(emoji: string): void {
+    this.chatService.react(this.message.id, this.currentUserId, emoji).subscribe({
+      error: (error) => {
+        console.error('Error reaccionando al mensaje', error);
+      },
+    });
+    this.closeReactionPicker();
+  }
+
+reactionPickerPosition = signal({ top: 0, left: 0, width: 320, height: 400 });
+  openReactionPickerFromMenu(event: MouseEvent): void {
+    this.closeMenu();
+    this.setReactionPickerPosition(event);
+    this.showReactionPicker.set(true);
+  }
+private setReactionPickerPosition(event: MouseEvent): void {
+  const target = event.currentTarget as HTMLElement;
+  const rect = target.getBoundingClientRect();
+
+  const minWidth = 320;
+  const maxWidth = 420;
+  const maxHeight = 400;
+  const minHeight = 280;
+  const margin = 12;
+
+  // --- ancho ---
+  const spaceRight = window.innerWidth - rect.left - margin;
+  const spaceLeft = rect.right - margin;
+
+  let width: number;
+  let left: number;
+
+  if (spaceRight >= minWidth) {
+    width = Math.min(maxWidth, spaceRight);
+    left = rect.left;
+  } else if (spaceLeft >= minWidth) {
+    width = Math.min(maxWidth, spaceLeft);
+    left = rect.right - width;
+  } else {
+    width = Math.max(spaceRight, spaceLeft, 260);
+    left = spaceRight >= spaceLeft ? rect.left : margin;
+  }
+
+  // --- alto: elegimos abrir hacia abajo o hacia arriba según dónde haya más lugar ---
+  const spaceBelow = window.innerHeight - rect.bottom - margin;
+  const spaceAbove = rect.top - margin;
+
+  let height: number;
+  let top: number;
+
+  if (spaceBelow >= minHeight || spaceBelow >= spaceAbove) {
+    // abre hacia abajo, recortando la altura al espacio real disponible
+    height = Math.max(minHeight, Math.min(maxHeight, spaceBelow));
+    top = rect.bottom + 8;
+
+    // por si acaso se pasa igual, lo clampeamos contra el borde inferior
+    if (top + height > window.innerHeight - margin) {
+      height = window.innerHeight - margin - top;
+    }
+  } else {
+    // abre hacia arriba
+    height = Math.max(minHeight, Math.min(maxHeight, spaceAbove));
+    top = rect.top - height - 8;
+
+    if (top < margin) {
+      top = margin;
+      height = rect.top - margin - 8;
+    }
+  }
+
+  this.reactionPickerPosition.set({ top, left, width, height });
+}
 }

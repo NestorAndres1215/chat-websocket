@@ -3,6 +3,7 @@ package com.example.chat.message.controller;
 import com.example.chat.message.dto.ChatMessageResponse;
 import com.example.chat.message.dto.EditMessageRequest;
 import com.example.chat.message.dto.MessageResponse;
+import com.example.chat.message.dto.ReactionRequest;
 import com.example.chat.message.entity.MessageEntity;
 import com.example.chat.message.enums.MessageStatus;
 import com.example.chat.message.mapper.MessageMapper;
@@ -68,4 +69,11 @@ public class MessageController {
         return ResponseEntity.ok(messageService.deleteMessage(id, userId));
     }
 
+    @PostMapping("/{id}/reactions")
+    public ResponseEntity<ChatMessageResponse> react(
+            @PathVariable Long id,
+            @RequestBody ReactionRequest request
+    ) {
+        return ResponseEntity.ok(messageService.react(id, request));
+    }
 }

@@ -7,7 +7,7 @@
   max-width: 65%;
   width: fit-content;
   margin-bottom: 10px;
-  margin-right: auto;  
+  margin-right: auto;
   padding: 8px 12px;
   border-radius: 10px;
   background-color: #202c33;
@@ -17,7 +17,7 @@
 
 .chat-message.own {
   background-color: #005c4b;
-  margin-left: auto; 
+  margin-left: auto;
   margin-right: 0;
 }
 
@@ -168,10 +168,21 @@
   flex-shrink: 0;
 }
 
-.file-card.pdf .file-icon { background-color: #e04b4b; }
-.file-card.word .file-icon { background-color: #2b579a; }
-.file-card.excel .file-icon { background-color: #217346; }
-.file-card.generic .file-icon { background-color: #6c757d; }
+.file-card.pdf .file-icon {
+  background-color: #e04b4b;
+}
+
+.file-card.word .file-icon {
+  background-color: #2b579a;
+}
+
+.file-card.excel .file-icon {
+  background-color: #217346;
+}
+
+.file-card.generic .file-icon {
+  background-color: #6c757d;
+}
 
 .file-icon svg {
   width: 20px;
@@ -401,4 +412,73 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.reaction-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.reaction-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.reaction-btn:hover {
+  opacity: 1;
+}
+
+.reaction-picker-popup {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  z-index: 10;
+  --background: #1f2c33;
+  --border-color: #2a3942;
+  width: 300px;
+  height: 350px;
+}
+
+.reaction-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+}
+
+.reactions-bar {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.reaction-pill {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  color: inherit;
+}
+
+.reaction-pill.mine {
+  background: rgba(0, 168, 132, 0.25);
+  border-color: #00a884;
+}
+
+.reaction-picker-popup {
+  position: fixed;
+  z-index: 1000;
+  --background: #1f2c33;
+  --border-color: #2a3942;
+}
+
+.reaction-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
 }
