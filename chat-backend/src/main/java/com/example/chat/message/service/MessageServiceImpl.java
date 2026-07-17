@@ -34,62 +34,39 @@ public class MessageServiceImpl implements MessageService {
     @Transactional
     public ChatMessageResponse send(ChatMessageRequest request) {
 
-
         UserEntity sender = userRepository.findById(request.getUserId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Usuario no encontrado.")
                 );
-
 
         UserEntity recipient = userRepository.findById(request.getRecipientId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Destinatario no encontrado.")
                 );
 
-
-
         MessageEntity replyTo = null;
-
 
         if (request.getReplyToId() != null) {
 
             replyTo = messageRepository.findById(request.getReplyToId())
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException("Mensaje al que respondes no encontrado.")
-                    );
+                    .orElseThrow(() -> new ResourceNotFoundException("Mensaje al que respondes no encontrado."));
 
         }
 
-
-
         MessageEntity entity = MessageEntity.builder()
-
                 .content(request.getContent())
-
                 .sentAt(LocalDateTime.now())
-
                 .status(MessageStatus.ENVIADO)
-
                 .user(sender)
-
                 .recipient(recipient)
-
                 .replyTo(replyTo)
-
                 .build();
 
-
-
         entity = messageRepository.save(entity);
-
-
 
         return mapper.toChatResponse(entity);
 
     }
-
-
-
 
     @Override
     @Transactional(readOnly = true)
@@ -102,80 +79,42 @@ public class MessageServiceImpl implements MessageService {
 
     }
 
-
-
-
-
     @Override
     @Transactional(readOnly = true)
     public MessageResponse findById(Long id) {
 
-
         MessageEntity entity = messageRepository.findById(id)
-
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Mensaje no encontrado.")
-                );
-
-
+                .orElseThrow(() -> new ResourceNotFoundException("Mensaje no encontrado."));
         return mapper.toResponse(entity);
-
     }
-
-
-
 
     @Transactional(readOnly = true)
     public List<MessageResponse> findConversation(Long userA, Long userB) {
 
-
         return messageRepository.findConversation(userA, userB)
-
                 .stream()
-
                 .map(mapper::toResponse)
-
                 .toList();
 
     }
 
     @Override
     @Transactional
-    public void updateStatus(
-            Long senderId,
-            Long recipientId,
-            MessageStatus status
-    ) {
+    public void updateStatus(Long senderId, Long recipientId, MessageStatus status) {
 
+        int updated = messageRepository.updateStatus(senderId, recipientId, status);
 
-        int updated = messageRepository.updateStatus(
-                senderId,
-                recipientId,
-                status
-        );
+        System.out.println("MENSAJES ACTUALIZADOS: " + updated);
 
+        List<MessageEntity> messages = messageRepository.findConversation(senderId, recipientId);
 
-        System.out.println(
-                "MENSAJES ACTUALIZADOS: " + updated
-        );
-
-
-
-        List<MessageEntity> messages =
-                messageRepository.findConversation(
-                        senderId,
-                        recipientId
-                );
         messages.forEach(message -> {
 
-            ChatMessageResponse response =
-                    mapper.toChatResponse(message);
+            ChatMessageResponse response = mapper.toChatResponse(message);
 
             messagingTemplate.convertAndSend("/topic/messages", response);
 
         });
-
-
     }
 
 }

@@ -18,20 +18,15 @@ import java.util.List;
 public class MessageController {
 
     private final MessageService messageService;
-    private final MessageMapper mapper;
 
     @GetMapping
     public List<MessageResponse> findAll() {
-
         return messageService.findAll();
-
     }
 
     @GetMapping("/{id}")
     public MessageResponse findById(@PathVariable Long id) {
-
         return messageService.findById(id);
-
     }
 
     @GetMapping("/conversation")
@@ -50,11 +45,7 @@ public class MessageController {
             @RequestParam MessageStatus status
     ) {
 
-        messageService.updateStatus(
-                senderId,
-                recipientId,
-                status
-        );
+        messageService.updateStatus(senderId, recipientId, status);
 
     }
 

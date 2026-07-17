@@ -41,7 +41,6 @@ public class UserHandshakeInterceptor implements HandshakeInterceptor {
             ServerHttpResponse response,
             WebSocketHandler wsHandler,
             Exception exception) {
-        // no-op
     }
 
 }
