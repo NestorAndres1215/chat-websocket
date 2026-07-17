@@ -5,5 +5,6 @@ export interface ChatMessageRequest {
   replyToId?: number;
   fileUrl?: string;
   fileName?: string;
+  fileSize?:number;
   type?: string;
 }

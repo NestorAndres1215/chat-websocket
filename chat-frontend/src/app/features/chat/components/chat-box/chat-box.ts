@@ -7,6 +7,8 @@ import {
   inject,
   CUSTOM_ELEMENTS_SCHEMA,
   ChangeDetectorRef,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -20,6 +22,8 @@ import { UserModel } from '../../../user/models/user.model';
 import { DisplayableMessage } from '../../../group/models/displayable-message.model';
 import { CommonModule } from '@angular/common';
 import 'emoji-picker-element';
+
+type FileKind = 'image' | 'pdf' | 'word' | 'excel' | 'generic';
 
 @Component({
   selector: 'app-chat-box',
@@ -49,6 +53,8 @@ export class ChatBox implements OnInit, OnDestroy {
   user!: UserModel | null;
 
   private subscriptions = new Subscription();
+
+  @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
 
   visibleMessages = computed(() => {
     const recipient = this.selectedRecipient();
@@ -98,22 +104,15 @@ export class ChatBox implements OnInit, OnDestroy {
         ) {
           this.chatService.markAsRead(message.userId, this.user.id).subscribe({
             next: () => {
-              console.log('Mensaje recibido marcado como LEIDO');
-
               this.messages.update((messages) =>
                 messages.map((m) => {
                   if (m.id === message.id) {
-                    return {
-                      ...m,
-                      status: 'LEIDO',
-                    };
+                    return { ...m, status: 'LEIDO' };
                   }
-
                   return m;
                 }),
               );
             },
-
             error: (error) => {
               console.error('Error actualizando leído', error);
             },
@@ -145,7 +144,6 @@ export class ChatBox implements OnInit, OnDestroy {
 
   selectRecipient(recipient: UserModel): void {
     this.selectedRecipient.set(recipient);
-
     this.replyingTo.set(null);
 
     if (!this.user) {
@@ -157,19 +155,12 @@ export class ChatBox implements OnInit, OnDestroy {
         this.messages.update((messages) =>
           messages.map((message) => {
             if (message.userId === recipient.id && message.recipientId === this.user?.id) {
-              return {
-                ...message,
-                status: 'LEIDO',
-              };
+              return { ...message, status: 'LEIDO' };
             }
-
             return message;
           }),
         );
-
-        console.log('Mensajes marcados como LEIDO');
       },
-
       error: (error) => {
         console.error('Error marcando mensajes como leídos', error);
       },
@@ -198,7 +189,6 @@ export class ChatBox implements OnInit, OnDestroy {
     this.replyingTo.set(null);
   }
 
-  // ACTUALIZADO: sube el archivo por HTTP primero, luego manda el mensaje por WS
   send(): void {
     const recipient = this.selectedRecipient();
 
@@ -212,8 +202,8 @@ export class ChatBox implements OnInit, OnDestroy {
 
     if (this.selectedFile) {
       this.chatService.uploadFile(this.selectedFile).subscribe({
-        next: ({ fileUrl, fileName }) => {
-          this.emitMessage(recipient.id, fileUrl, fileName, 'FILE');
+        next: ({ fileUrl, fileName, fileSize }) => {
+          this.emitMessage(recipient.id, fileUrl, fileName, 'FILE', fileSize);
         },
         error: (error) => {
           console.error('Error subiendo archivo', error);
@@ -229,6 +219,7 @@ export class ChatBox implements OnInit, OnDestroy {
     fileUrl?: string,
     fileName?: string,
     type?: string,
+    fileSize?: number,
   ): void {
     if (!this.user) {
       return;
@@ -241,11 +232,12 @@ export class ChatBox implements OnInit, OnDestroy {
       replyToId: this.replyingTo()?.id,
       fileUrl,
       fileName,
+      fileSize,
       type,
     });
 
     this.content = '';
-    this.selectedFile = undefined;
+    this.clearFileSelection();
     this.replyingTo.set(null);
 
     this.chatService.sendTyping({
@@ -257,6 +249,10 @@ export class ChatBox implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+
+    if (this.previewUrl()) {
+      URL.revokeObjectURL(this.previewUrl()!);
+    }
   }
 
   showEmojiPicker = signal(false);
@@ -285,9 +281,15 @@ export class ChatBox implements OnInit, OnDestroy {
     }
   }
 
-  selectedFile?: File;
+  // --- Manejo de archivo / preview modal ---
 
-  // ACTUALIZADO: ya no lee el archivo como base64, solo lo guarda para subirlo después
+  selectedFile?: File;
+  previewUrl = signal<string | null>(null);
+
+  triggerFileInput(): void {
+    this.fileInputRef.nativeElement.click();
+  }
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
 
@@ -296,5 +298,54 @@ export class ChatBox implements OnInit, OnDestroy {
     }
 
     this.selectedFile = input.files[0];
+
+    if (this.previewUrl()) {
+      URL.revokeObjectURL(this.previewUrl()!);
+      this.previewUrl.set(null);
+    }
+
+    if (this.selectedFile.type.startsWith('image/')) {
+      this.previewUrl.set(URL.createObjectURL(this.selectedFile));
+    }
   }
+
+  clearFileSelection(): void {
+    this.selectedFile = undefined;
+
+    if (this.previewUrl()) {
+      URL.revokeObjectURL(this.previewUrl()!);
+    }
+    this.previewUrl.set(null);
+
+    if (this.fileInputRef) {
+      this.fileInputRef.nativeElement.value = '';
+    }
+  }
+
+  fileKind = computed<FileKind>(() => {
+    const name = this.selectedFile?.name ?? '';
+    const match = name.match(/\.([a-zA-Z0-9]+)$/);
+    const ext = match ? match[1].toLowerCase() : '';
+
+    if (/^(jpg|jpeg|png|gif|webp|bmp)$/.test(ext)) return 'image';
+    if (ext === 'pdf') return 'pdf';
+    if (/^(doc|docx)$/.test(ext)) return 'word';
+    if (/^(xls|xlsx|csv)$/.test(ext)) return 'excel';
+    return 'generic';
+  });
+
+  fileExtensionLabel = computed(() => {
+    const name = this.selectedFile?.name ?? '';
+    const match = name.match(/\.([a-zA-Z0-9]+)$/);
+    return match ? match[1].toUpperCase() : '';
+  });
+
+  fileSizeLabel = computed(() => {
+    const size = this.selectedFile?.size ?? 0;
+
+    if (size <= 0) return '';
+    if (size < 1024) return `${size} B`;
+    if (size < 1024 * 1024) return `${(size / 1024).toFixed(0)} kB`;
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  });
 }

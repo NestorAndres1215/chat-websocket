@@ -28,8 +28,6 @@
     </div>
 
 
-
-
     <div class="chat-panel">
 
 
@@ -46,20 +44,14 @@
         } @else {
 
 
-
         <div class="messages">
-
 
             @for (message of visibleMessages(); track message.id) {
 
-
             <app-message-item [message]="message" [currentUserId]="user?.id ?? 0" (reply)="startReply($event)">
-
             </app-message-item>
 
-
             }
-
 
         </div>
 
@@ -80,91 +72,152 @@
         }
 
 
-
-
         @if (replyingTo()) {
-
 
         <div class="reply-bar">
 
-
             <span>
-
                 Respondiendo a
                 {{ replyingTo()?.username }}:
                 {{ replyingTo()?.content }}
-
             </span>
 
-
             <button type="button" (click)="cancelReply()">
-
                 ✕
-
             </button>
 
-
         </div>
-
 
         }
 
 
-
-
-
+        <!-- ===== INPUT AREA NORMAL ===== -->
         <div class="input-area" style="position: relative;">
-
 
             <button type="button" class="emoji-toggle-btn" (click)="toggleEmojiPicker()">
                 😊
             </button>
 
-
-
             @if (showEmojiPicker()) {
-
             <emoji-picker class="emoji-picker-popup" (emoji-click)="onEmojiClick($event)">
             </emoji-picker>
-
             }
 
+            <!-- input file oculto, controlado por el botón de clip -->
+            <input #fileInput type="file" (change)="onFileSelected($event)" hidden>
 
+            <button type="button" class="attach-btn" (click)="triggerFileInput()" title="Adjuntar archivo">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M21.44 11.05l-9.19 9.19a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.5 3.5 0 0 1 4.95 4.95l-9.19 9.19a1.5 1.5 0 0 1-2.12-2.12l8.49-8.49"
+                        stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
 
-            <!-- ARCHIVO -->
-            <input type="file" id="fileInput" (change)="onFileSelected($event)">
-
-
-
-            @if (selectedFile) {
-
-            <div class="file-preview">
-
-                📎 {{ selectedFile.name }}
-
-            </div>
-
-            }
-
-
-
-
-            <!-- MENSAJE -->
             <input [(ngModel)]="content" placeholder="Escribe un mensaje..." (input)="sendTyping()"
                 (keydown.enter)="send()">
 
-
-
             <button (click)="send()" [disabled]="!content.trim() && !selectedFile">
-
                 Enviar
-
             </button>
-
 
         </div>
 
 
+        <!-- ===== OVERLAY DE PREVIEW DE ARCHIVO ===== -->
+        @if (selectedFile) {
+
+        <div class="file-preview-overlay">
+
+            <div class="file-preview-header">
+                <button type="button" class="file-preview-close" (click)="clearFileSelection()">
+                    ✕
+                </button>
+                <span>{{ selectedFile.name }}</span>
+            </div>
+
+            <div class="file-preview-body">
+
+                @if (fileKind() === 'image' && previewUrl()) {
+
+                <img [src]="previewUrl()" alt="preview" class="file-preview-image" />
+
+                } @else {
+
+                <div class="file-preview-icon-box" [class]="fileKind()">
+
+                    @switch (fileKind()) {
+
+                    @case ('pdf') {
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#fff" />
+                        <path d="M14 2v5h5" fill="#e04b4b" />
+                    </svg>
+                    }
+
+                    @case ('word') {
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#fff" />
+                        <path d="M14 2v5h5" fill="#2b579a" />
+                    </svg>
+                    }
+
+                    @case ('excel') {
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#fff" />
+                        <path d="M14 2v5h5" fill="#217346" />
+                    </svg>
+                    }
+
+                    @default {
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#fff" />
+                        <path d="M14 2v5h5" fill="#6c757d" />
+                    </svg>
+                    }
+
+                    }
+
+                </div>
+
+                <p class="file-preview-no-preview">No hay vista previa disponible</p>
+                <p class="file-preview-meta">
+                    {{ fileSizeLabel() }} · {{ fileExtensionLabel() }}
+                </p>
+
+                }
+
+            </div>
+
+            <div class="file-preview-caption-bar">
+                <input [(ngModel)]="content" placeholder="Escribe un mensaje..." (keydown.enter)="send()">
+            </div>
+
+            <div class="file-preview-bottom-row">
+
+                <div class="file-thumb active" [class]="fileKind()">
+                    @if (fileKind() === 'image' && previewUrl()) {
+                    <img [src]="previewUrl()" alt="thumb" />
+                    } @else {
+                    <span class="thumb-ext-label">{{ fileExtensionLabel() }}</span>
+                    }
+                </div>
+
+                <button type="button" class="add-more-btn" (click)="triggerFileInput()" title="Cambiar archivo">
+                    +
+                </button>
+
+                <button type="button" class="send-fab" (click)="send()" title="Enviar">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 11l18-8-8 18-2.5-7.5L3 11z" fill="currentColor" />
+                    </svg>
+                </button>
+
+            </div>
+
+        </div>
+
+        }
 
 
         }
