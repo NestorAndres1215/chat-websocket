@@ -20,13 +20,14 @@ import { UserModel } from '../../../user/models/user.model';
 import { DisplayableMessage } from '../../../group/models/displayable-message.model';
 import { CommonModule } from '@angular/common';
 import 'emoji-picker-element';
+
 @Component({
   selector: 'app-chat-box',
   standalone: true,
-  imports: [FormsModule, MessageItem, CommonModule],
+  imports: [FormsModule, CommonModule, MessageItem],
   templateUrl: './chat-box.html',
   styleUrl: './chat-box.css',
-  schemas: [CUSTOM_ELEMENTS_SCHEMA], // <-- necesario para <emoji-picker>
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ChatBox implements OnInit, OnDestroy {
   private readonly chatService = inject(ChatService);
@@ -79,7 +80,6 @@ export class ChatBox implements OnInit, OnDestroy {
 
     this.subscriptions.add(
       this.chatService.messages().subscribe((message) => {
-        // Agregar o actualizar mensaje recibido
         this.messages.update((current) => {
           const exists = current.some((m) => m.id === message.id);
 
@@ -90,8 +90,6 @@ export class ChatBox implements OnInit, OnDestroy {
           return [...current, message];
         });
 
-        // Si estoy viendo el chat del usuario que me mandó el mensaje
-        // lo marco automáticamente como LEIDO
         if (
           this.user &&
           message.recipientId === this.user.id &&
@@ -123,8 +121,6 @@ export class ChatBox implements OnInit, OnDestroy {
         }
       }),
     );
-
-    // ESCUCHAR ESCRIBIENDO
 
     this.subscriptions.add(
       this.chatService.typing().subscribe((event) => {
@@ -179,6 +175,7 @@ export class ChatBox implements OnInit, OnDestroy {
       },
     });
   }
+
   sendTyping(): void {
     const recipient = this.selectedRecipient();
 
@@ -188,9 +185,7 @@ export class ChatBox implements OnInit, OnDestroy {
 
     this.chatService.sendTyping({
       senderId: this.user.id,
-
       receiverId: recipient.id,
-
       typing: true,
     });
   }
@@ -203,36 +198,59 @@ export class ChatBox implements OnInit, OnDestroy {
     this.replyingTo.set(null);
   }
 
+  // ACTUALIZADO: sube el archivo por HTTP primero, luego manda el mensaje por WS
   send(): void {
-    if (!this.content.trim()) {
-      return;
-    }
-
     const recipient = this.selectedRecipient();
 
     if (!this.user || !recipient) {
       return;
     }
 
+    if (!this.content.trim() && !this.selectedFile) {
+      return;
+    }
+
+    if (this.selectedFile) {
+      this.chatService.uploadFile(this.selectedFile).subscribe({
+        next: ({ fileUrl, fileName }) => {
+          this.emitMessage(recipient.id, fileUrl, fileName, 'FILE');
+        },
+        error: (error) => {
+          console.error('Error subiendo archivo', error);
+        },
+      });
+    } else {
+      this.emitMessage(recipient.id, undefined, undefined, 'TEXT');
+    }
+  }
+
+  private emitMessage(
+    recipientId: number,
+    fileUrl?: string,
+    fileName?: string,
+    type?: string,
+  ): void {
+    if (!this.user) {
+      return;
+    }
+
     this.chatService.send({
       userId: this.user.id,
-
-      recipientId: recipient.id,
-
+      recipientId,
       content: this.content,
-
       replyToId: this.replyingTo()?.id,
+      fileUrl,
+      fileName,
+      type,
     });
 
     this.content = '';
-
+    this.selectedFile = undefined;
     this.replyingTo.set(null);
 
     this.chatService.sendTyping({
       senderId: this.user.id,
-
-      receiverId: recipient.id,
-
+      receiverId: recipientId,
       typing: false,
     });
   }
@@ -243,31 +261,40 @@ export class ChatBox implements OnInit, OnDestroy {
 
   showEmojiPicker = signal(false);
 
-  // ... resto de signals igual ...
-
-
   private cdr = inject(ChangeDetectorRef);
+
   onEmojiClick(event: any): void {
     const emoji = event.detail?.unicode ?? '';
     this.content += emoji;
     this.showEmojiPicker.set(false);
     this.sendTyping();
-    this.cdr.detectChanges(); // fuerza actualización de la vista
+    this.cdr.detectChanges();
   }
+
   closingEmojiPicker = signal(false);
 
-toggleEmojiPicker(): void {
-  if (this.showEmojiPicker()) {
-    this.closingEmojiPicker.set(true);
-    setTimeout(() => {
-      this.showEmojiPicker.set(false);
-      this.closingEmojiPicker.set(false);
-    }, 180); // debe coincidir con la duración de la animación de salida
-  } else {
-    this.showEmojiPicker.set(true);
+  toggleEmojiPicker(): void {
+    if (this.showEmojiPicker()) {
+      this.closingEmojiPicker.set(true);
+      setTimeout(() => {
+        this.showEmojiPicker.set(false);
+        this.closingEmojiPicker.set(false);
+      }, 180);
+    } else {
+      this.showEmojiPicker.set(true);
+    }
   }
-}
 
+  selectedFile?: File;
 
+  // ACTUALIZADO: ya no lee el archivo como base64, solo lo guarda para subirlo después
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
 
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+
+    this.selectedFile = input.files[0];
+  }
 }

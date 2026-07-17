@@ -3,4 +3,7 @@ export interface ChatMessageRequest {
   recipientId: number;
   content: string;
   replyToId?: number;
+  fileUrl?: string;
+  fileName?: string;
+  type?: string;
 }

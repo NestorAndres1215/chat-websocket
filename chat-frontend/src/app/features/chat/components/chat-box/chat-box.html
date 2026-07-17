@@ -113,27 +113,56 @@
 
 
 
-<div class="input-area" style="position: relative;">
+        <div class="input-area" style="position: relative;">
 
-    <button type="button" class="emoji-toggle-btn" (click)="toggleEmojiPicker()">
-        😊
-    </button>
 
-    @if (showEmojiPicker()) {
-        <emoji-picker
-            class="emoji-picker-popup"
-            (emoji-click)="onEmojiClick($event)">
-        </emoji-picker>
-    }
+            <button type="button" class="emoji-toggle-btn" (click)="toggleEmojiPicker()">
+                😊
+            </button>
 
-    <input [(ngModel)]="content" placeholder="Escribe un mensaje..." (input)="sendTyping()"
-        (keydown.enter)="send()">
 
-    <button (click)="send()" [disabled]="!content.trim()">
-        Enviar
-    </button>
 
-</div>
+            @if (showEmojiPicker()) {
+
+            <emoji-picker class="emoji-picker-popup" (emoji-click)="onEmojiClick($event)">
+            </emoji-picker>
+
+            }
+
+
+
+            <!-- ARCHIVO -->
+            <input type="file" id="fileInput" (change)="onFileSelected($event)">
+
+
+
+            @if (selectedFile) {
+
+            <div class="file-preview">
+
+                📎 {{ selectedFile.name }}
+
+            </div>
+
+            }
+
+
+
+
+            <!-- MENSAJE -->
+            <input [(ngModel)]="content" placeholder="Escribe un mensaje..." (input)="sendTyping()"
+                (keydown.enter)="send()">
+
+
+
+            <button (click)="send()" [disabled]="!content.trim() && !selectedFile">
+
+                Enviar
+
+            </button>
+
+
+        </div>
 
 
 

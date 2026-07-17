@@ -20,7 +20,15 @@ public class MessageResponse {
     private Long recipientId;
 
     private String content;
+
+    private String fileUrl;
+
+    private String fileName;
+
+    private String type;
+
     private String status;
+
     private LocalDateTime sentAt;
 
     private ReplyPreview replyTo;

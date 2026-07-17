@@ -1,12 +1,8 @@
 import { Observable } from 'rxjs';
 import { inject } from '@angular/core';
 
-import { ApiService } from '../../../core/http/api.service';
-
 import { WebsocketService } from '../../../core/websocket/websocket.service';
-
 import { ChatMessageRequest } from '../models/chat-message-request';
-
 import { ChatMessageResponse } from '../models/chat-message-response';
 import { Service } from '@angular/core';
 import { environment } from '../../../core/config/environment';
@@ -72,6 +68,16 @@ export class ChatService {
           status: 'LEIDO',
         },
       },
+    );
+  }
+
+  uploadFile(file: File): Observable<{ fileUrl: string; fileName: string; fileSize: number }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<{ fileUrl: string; fileName: string; fileSize: number }>(
+      `${this.url}/upload`,
+      formData,
     );
   }
 }

@@ -15,4 +15,12 @@ public class ChatMessageRequest {
 
     private Long replyToId;
 
+    private String fileUrl;
+
+    private String fileName;
+
+    private Long fileSize;
+
+    private String type;
+
 }

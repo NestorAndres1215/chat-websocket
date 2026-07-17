@@ -1,3 +1,5 @@
+import { ReplyPreview } from "../../chat/models/reply-preview";
+
 export interface GroupReplyPreview {
   id: number;
   username: string;
@@ -13,11 +15,14 @@ export interface GroupMessageRequest {
 
 export interface GroupMessageResponse {
   id: number;
-  groupId: number;
   userId: number;
   username: string;
   fullName: string;
   content: string;
   sentAt: string;
-  replyTo: GroupReplyPreview | null;
+  status?: string;
+  replyTo?: ReplyPreview | null;
+  fileUrl?: string;
+  fileName?: string;
+  type?: string;
 }

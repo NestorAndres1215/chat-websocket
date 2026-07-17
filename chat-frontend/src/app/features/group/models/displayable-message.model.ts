@@ -1,23 +1,27 @@
 import { ReplyPreview } from '../../chat/models/reply-preview';
 
 export interface DisplayableMessage {
+  id: number;
 
-    id: number;
+  userId: number;
 
-    userId: number;
+  username: string;
 
-    username: string;
+  fullName: string;
 
-    fullName: string;
+  content: string;
 
-    content: string;
+  sentAt: string;
 
-    sentAt: string;
+  recipientId?: number;
 
-    recipientId?: number;
+  status?: string;
 
-    status?: string;
+  replyTo?: ReplyPreview | null;
 
-    replyTo?: ReplyPreview | null;
+  fileUrl?: string;
 
+  fileName?: string;
+  fileSize?: number;
+  type?: string;
 }

@@ -4,12 +4,16 @@ import com.example.chat.message.dto.ChatMessageRequest;
 import com.example.chat.message.dto.ChatMessageResponse;
 import com.example.chat.message.dto.MessageResponse;
 import com.example.chat.message.enums.MessageStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface MessageService {
 
-    ChatMessageResponse send(ChatMessageRequest request);
+    ChatMessageResponse send(
+            ChatMessageRequest request
+
+    );
 
     List<MessageResponse> findAll();
 

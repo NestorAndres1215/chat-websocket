@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MessageMapper {
 
+
     public ChatMessageResponse toChatResponse(MessageEntity entity) {
 
         return ChatMessageResponse.builder()
@@ -18,6 +19,11 @@ public class MessageMapper {
                 .fullName(entity.getUser().getFullName())
                 .recipientId(entity.getRecipient().getId())
                 .content(entity.getContent())
+
+                .fileUrl(entity.getFileUrl())
+                .fileName(entity.getFileName())
+                .type(entity.getType().name())
+
                 .status(entity.getStatus().name())
                 .sentAt(entity.getSentAt())
                 .replyTo(toReplyPreview(entity.getReplyTo()))
@@ -36,6 +42,11 @@ public class MessageMapper {
                 .fullName(entity.getUser().getFullName())
                 .recipientId(entity.getRecipient().getId())
                 .content(entity.getContent())
+
+                .fileUrl(entity.getFileUrl())
+                .fileName(entity.getFileName())
+                .type(entity.getType().name())
+
                 .status(entity.getStatus().name())
                 .sentAt(entity.getSentAt())
                 .replyTo(toReplyPreview(entity.getReplyTo()))

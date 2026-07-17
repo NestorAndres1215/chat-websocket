@@ -121,7 +121,13 @@ private toDisplayableMessage(message: GroupMessageResponse): DisplayableMessage 
 
     sentAt: message.sentAt,
 
-    replyTo: message.replyTo
+    replyTo: message.replyTo,
+
+    fileUrl: message.fileUrl,
+
+    fileName: message.fileName,
+
+    type: message.type,
 
   };
 
