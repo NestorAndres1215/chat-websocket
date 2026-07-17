@@ -1,23 +1,25 @@
 import { ReplyPreview } from './reply-preview';
 
 export interface ChatMessageResponse {
+  id: number;
 
-    id: number;
+  userId: number;
 
-    userId: number;
+  username: string;
 
-    username: string;
+  fullName: string;
 
-    fullName: string;
+  recipientId: number;
 
-    recipientId: number;
+  content: string;
 
-    content: string;
+  sentAt: string;
 
-    sentAt: string;
+  status: string;
 
-    status: string;
+  replyTo: ReplyPreview | null;
 
-    replyTo: ReplyPreview | null;
-
+  edited?: boolean;
+  editedAt?: string;
+  deleted?: boolean;
 }

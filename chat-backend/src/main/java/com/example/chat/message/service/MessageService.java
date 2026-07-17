@@ -2,6 +2,7 @@ package com.example.chat.message.service;
 
 import com.example.chat.message.dto.ChatMessageRequest;
 import com.example.chat.message.dto.ChatMessageResponse;
+import com.example.chat.message.dto.EditMessageRequest;
 import com.example.chat.message.dto.MessageResponse;
 import com.example.chat.message.enums.MessageStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,5 +21,9 @@ public interface MessageService {
     MessageResponse findById(Long id);
     List<MessageResponse> findConversation(Long userA, Long userB);
     void updateStatus(Long senderId, Long recipientId, MessageStatus status);
+
+    ChatMessageResponse editMessage(Long messageId, EditMessageRequest request);
+
+    ChatMessageResponse deleteMessage(Long messageId, Long userId);
 
 }

@@ -80,4 +80,17 @@ export class ChatService {
       formData,
     );
   }
+
+  editMessage(messageId: number, userId: number, content: string): Observable<ChatMessageResponse> {
+    return this.http.put<ChatMessageResponse>(`${this.url}/messages/${messageId}`, {
+      userId,
+      content,
+    });
+  }
+
+  deleteMessage(messageId: number, userId: number): Observable<ChatMessageResponse> {
+    return this.http.delete<ChatMessageResponse>(`${this.url}/messages/${messageId}`, {
+      params: { userId },
+    });
+  }
 }

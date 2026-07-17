@@ -22,11 +22,16 @@ public class MessageMapper {
 
                 .fileUrl(entity.getFileUrl())
                 .fileName(entity.getFileName())
+                .fileSize(entity.getFileSize())
                 .type(entity.getType().name())
 
                 .status(entity.getStatus().name())
                 .sentAt(entity.getSentAt())
                 .replyTo(toReplyPreview(entity.getReplyTo()))
+
+                .edited(entity.getEdited())
+                .editedAt(entity.getEditedAt())
+                .deleted(entity.getDeleted())
                 .build();
 
     }
@@ -45,15 +50,19 @@ public class MessageMapper {
 
                 .fileUrl(entity.getFileUrl())
                 .fileName(entity.getFileName())
+                .fileSize(entity.getFileSize())
                 .type(entity.getType().name())
 
                 .status(entity.getStatus().name())
                 .sentAt(entity.getSentAt())
                 .replyTo(toReplyPreview(entity.getReplyTo()))
+
+                .edited(entity.getEdited())
+                .editedAt(entity.getEditedAt())
+                .deleted(entity.getDeleted())
                 .build();
 
     }
-
 
 
     private ReplyPreview toReplyPreview(MessageEntity replyTo) {
@@ -62,13 +71,14 @@ public class MessageMapper {
             return null;
         }
 
-
         return ReplyPreview.builder()
                 .id(replyTo.getId())
                 .username(replyTo.getUser().getUsername())
                 .content(replyTo.getContent())
+                .fileUrl(replyTo.getFileUrl())
+                .fileName(replyTo.getFileName())
+                .type(replyTo.getType() != null ? replyTo.getType().name() : null)
                 .build();
 
     }
-
 }

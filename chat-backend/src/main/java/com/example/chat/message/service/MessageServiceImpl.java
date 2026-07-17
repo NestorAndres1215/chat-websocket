@@ -1,8 +1,10 @@
 package com.example.chat.message.service;
 
+import com.example.chat.exception.ForbiddenOperationException;
 import com.example.chat.exception.ResourceNotFoundException;
 import com.example.chat.message.dto.ChatMessageRequest;
 import com.example.chat.message.dto.ChatMessageResponse;
+import com.example.chat.message.dto.EditMessageRequest;
 import com.example.chat.message.dto.MessageResponse;
 import com.example.chat.message.entity.MessageEntity;
 import com.example.chat.message.enums.MessageStatus;
@@ -60,14 +62,10 @@ public class MessageServiceImpl implements MessageService {
         if (request.getReplyToId() != null) {
             replyTo = messageRepository.findById(request.getReplyToId())
                     .orElseThrow(() ->
-                            new ResourceNotFoundException(
-                                    "Mensaje al que respondes no encontrado."
-                            )
+                            new ResourceNotFoundException("Mensaje al que respondes no encontrado.")
                     );
         }
 
-        // El archivo ya fue subido antes por HTTP (POST /api/messages/upload).
-        // Aquí solo llega la referencia (fileUrl), no el binario.
         String fileUrl = request.getFileUrl();
         String fileName = request.getFileName();
 
@@ -115,18 +113,13 @@ public class MessageServiceImpl implements MessageService {
     @Transactional(readOnly = true)
     public MessageResponse findById(Long id) {
 
-
         MessageEntity entity =
                 messageRepository.findById(id)
                         .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Mensaje no encontrado."
-                                )
+                                new ResourceNotFoundException("Mensaje no encontrado.")
                         );
 
-
         return mapper.toResponse(entity);
-
     }
 
 
@@ -145,56 +138,79 @@ public class MessageServiceImpl implements MessageService {
 
     }
 
-
-
-
     @Override
     @Transactional
-    public void updateStatus(
-            Long senderId,
-            Long recipientId,
-            MessageStatus status
-    ) {
+    public void updateStatus(Long senderId, Long recipientId, MessageStatus status) {
 
 
-        int updated =
-                messageRepository.updateStatus(
-                        senderId,
-                        recipientId,
-                        status
-                );
+        int updated = messageRepository.updateStatus(senderId, recipientId, status);
 
+        System.out.println("MENSAJES ACTUALIZADOS: " + updated);
 
-        System.out.println(
-                "MENSAJES ACTUALIZADOS: " + updated
-        );
-
-
-
-        List<MessageEntity> messages =
-                messageRepository.findConversation(
-                        senderId,
-                        recipientId
-                );
-
-
+        List<MessageEntity> messages = messageRepository.findConversation(senderId, recipientId);
 
         messages.forEach(message -> {
 
 
-            ChatMessageResponse response =
-                    mapper.toChatResponse(message);
+            ChatMessageResponse response = mapper.toChatResponse(message);
 
-
-
-            messagingTemplate.convertAndSend(
-                    "/topic/messages",
-                    response
-            );
-
+            messagingTemplate.convertAndSend("/topic/messages", response);
 
         });
-
     }
 
+
+    @Override
+    @Transactional
+    public ChatMessageResponse editMessage(Long messageId, EditMessageRequest request) {
+
+        MessageEntity message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Mensaje no encontrado."));
+
+        if (!message.getUser().getId().equals(request.getUserId())) {
+            throw new ForbiddenOperationException("No puedes editar un mensaje que no es tuyo.");
+        }
+
+        if (Boolean.TRUE.equals(message.getDeleted())) {
+            throw new IllegalStateException("No puedes editar un mensaje eliminado.");
+        }
+
+        message.setContent(request.getContent());
+        message.setEdited(true);
+        message.setEditedAt(LocalDateTime.now());
+
+        MessageEntity saved = messageRepository.save(message);
+
+        ChatMessageResponse response = mapper.toChatResponse(saved);
+
+        messagingTemplate.convertAndSend("/topic/messages", response);
+
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public ChatMessageResponse deleteMessage(Long messageId, Long userId) {
+
+        MessageEntity message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Mensaje no encontrado."));
+
+        if (!message.getUser().getId().equals(userId)) {
+            throw new ForbiddenOperationException("No puedes eliminar un mensaje que no es tuyo.");
+        }
+
+        message.setDeleted(true);
+        message.setContent(null);
+        message.setFileUrl(null);
+        message.setFileName(null);
+        message.setFileSize(null);
+
+        MessageEntity saved = messageRepository.save(message);
+
+        ChatMessageResponse response = mapper.toChatResponse(saved);
+
+        messagingTemplate.convertAndSend("/topic/messages", response);
+
+        return response;
+    }
 }

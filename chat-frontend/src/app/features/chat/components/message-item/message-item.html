@@ -2,132 +2,228 @@
 
     <div class="header">
         <strong>{{ message.username }}</strong>
-        <span>{{ message.sentAt | date:'short' }}</span>
-    </div>
 
+        <div class="header-right">
+            @if (message.edited && !isDeleted()) {
+            <span class="edited-label">Editado</span>
+            }
 
-    @if (message.replyTo) {
+            <span>{{ message.sentAt | date:'short' }}</span>
 
-        <div class="reply-preview">
-            <strong>{{ message.replyTo.username }}</strong>
-            <span>{{ message.replyTo.content }}</span>
-            <span>{{ message.status }}</span>
+            @if (!isDeleted() && !isEditing()) {
+            <button type="button" class="chevron-btn" (click)="toggleMenu()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </button>
+            }
         </div>
 
+    </div>
+
+    @if (showMenu()) {
+
+    <div class="message-menu-backdrop" (click)="closeMenu()"></div>
+
+    <div class="message-menu">
+
+        <button type="button" (click)="onReplyClick()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 17l-5-5 5-5M4 12h11a5 5 0 0 1 5 5v1" stroke="currentColor" stroke-width="1.6"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>Responder</span>
+        </button>
+
+        @if (isOwn()) {
+
+        <button type="button" (click)="startEdit()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 20h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor"
+                    stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>Editar</span>
+        </button>
+
+        <button type="button" class="danger" (click)="confirmDelete()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"
+                    stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>Eliminar</span>
+        </button>
+
+        }
+
+    </div>
+
     }
+
+
+@if (message.replyTo && !isDeleted()) {
+
+    <div class="reply-preview">
+        <strong>{{ message.replyTo.username }}</strong>
+
+        <div class="reply-preview-body">
+
+            @if (replyHasFile()) {
+
+                @if (replyIsImage()) {
+                    <img [src]="replyFullFileUrl()" alt="preview" class="reply-thumb" />
+                } @else {
+                    <span class="reply-file-icon">📎</span>
+                }
+
+            }
+
+            <span class="reply-text">
+                {{ message.replyTo.content || message.replyTo.fileName }}
+            </span>
+
+        </div>
+    </div>
+
+}
+
+
+    @if (isDeleted()) {
+
+    <p class="deleted-message">
+        🚫 Mensaje eliminado
+    </p>
+
+    } @else {
 
 
     @if (hasFile()) {
 
-        @if (isImage()) {
+    @if (isImage()) {
 
-            <img
-                [src]="fullFileUrl()"
-                [alt]="message.fileName"
-                class="message-image"
-                (error)="onImageError($event)"
-            />
+    <img [src]="fullFileUrl()" [alt]="message.fileName" class="message-image" (error)="onImageError($event)" />
 
-        } @else {
+    } @else {
 
-            <div class="file-card" [class]="fileKind()" (click)="onDownload()">
+    <div class="file-card" [class]="fileKind()" (click)="onDownload()">
 
-                <div class="file-icon">
+        <div class="file-icon">
 
-                    @switch (fileKind()) {
+            @switch (fileKind()) {
 
-                        @case ('pdf') {
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#fff"/>
-                                <path d="M14 2v5h5" fill="#e04b4b"/>
-                            </svg>
-                        }
+            @case ('pdf') {
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#fff" />
+                <path d="M14 2v5h5" fill="#e04b4b" />
+            </svg>
+            }
 
-                        @case ('word') {
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#fff"/>
-                                <path d="M14 2v5h5" fill="#2b579a"/>
-                            </svg>
-                        }
+            @case ('word') {
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#fff" />
+                <path d="M14 2v5h5" fill="#2b579a" />
+            </svg>
+            }
 
-                        @case ('excel') {
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#fff"/>
-                                <path d="M14 2v5h5" fill="#217346"/>
-                            </svg>
-                        }
+            @case ('excel') {
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#fff" />
+                <path d="M14 2v5h5" fill="#217346" />
+            </svg>
+            }
 
-                        @default {
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#fff"/>
-                                <path d="M14 2v5h5" fill="#6c757d"/>
-                            </svg>
-                        }
+            @default {
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#fff" />
+                <path d="M14 2v5h5" fill="#6c757d" />
+            </svg>
+            }
 
-                    }
+            }
 
-                </div>
+        </div>
 
-                <div class="file-info">
-                    <span class="file-name">{{ message.fileName }}</span>
-                    <span class="file-meta">
-                        {{ extensionLabel() }}
-                        @if (fileSizeLabel()) {
-                            · {{ fileSizeLabel() }}
-                        }
-                    </span>
-                </div>
+        <div class="file-info">
+            <span class="file-name">{{ message.fileName }}</span>
+            <span class="file-meta">
+                {{ extensionLabel() }}
+                @if (fileSizeLabel()) {
+                · {{ fileSizeLabel() }}
+                }
+            </span>
+        </div>
 
-                <button type="button" class="download-btn" (click)="$event.stopPropagation(); onDownload()">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
-                        <path d="M12 7v7m0 0l-3-3m3 3l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
+        <button type="button" class="download-btn" (click)="$event.stopPropagation(); onDownload()">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5" />
+                <path d="M12 7v7m0 0l-3-3m3 3l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+        </button>
 
-            </div>
+    </div>
 
-        }
+    }
 
     }
 
 
-    @if (message.content) {
-        <p>{{ message.content }}</p>
+    @if (isEditing()) {
+
+    <div class="edit-box">
+        <input [(ngModel)]="editContent" (keydown.enter)="confirmEdit()" (keydown.escape)="cancelEdit()" autofocus>
+        <div class="edit-actions">
+            <button type="button" class="cancel-btn" (click)="cancelEdit()">Cancelar</button>
+            <button type="button" class="save-btn" (click)="confirmEdit()">Guardar</button>
+        </div>
+    </div>
+
+    } @else if (message.content) {
+
+    <p>
+        {{ message.content }}
+
+    </p>
+
+    }
+
     }
 
 
-   @if (isOwn()) {
+    @if (isOwn() && !isDeleted()) {
     <span class="status" [class.read]="message.status === 'LEIDO'">
         @switch (message.status) {
-            @case ('ENVIADO') {
-                <svg viewBox="0 0 16 15" class="check-icon">
-                    <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z" fill="currentColor"/>
-                </svg>
-            }
-            @case ('ENTREGADO') {
-                <svg viewBox="0 0 16 15" class="check-icon double">
-                    <path d="M11.071.653a.457.457 0 0 0-.304-.102.493.493 0 0 0-.398.201l-6.283 8.06-2.6-2.475a.463.463 0 0 0-.339-.125.446.446 0 0 0-.328.152l-.435.492a.531.531 0 0 0-.13.396.53.53 0 0 0 .176.38l3.292 3.128c.135.13.324.2.518.2.194 0 .383-.07.518-.2l6.987-8.955a.512.512 0 0 0-.093-.702l-.481-.372z" fill="currentColor"/>
-                    <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z" fill="currentColor"/>
-                </svg>
-            }
-            @case ('LEIDO') {
-                <svg viewBox="0 0 16 15" class="check-icon double">
-                    <path d="M11.071.653a.457.457 0 0 0-.304-.102.493.493 0 0 0-.398.201l-6.283 8.06-2.6-2.475a.463.463 0 0 0-.339-.125.446.446 0 0 0-.328.152l-.435.492a.531.531 0 0 0-.13.396.53.53 0 0 0 .176.38l3.292 3.128c.135.13.324.2.518.2.194 0 .383-.07.518-.2l6.987-8.955a.512.512 0 0 0-.093-.702l-.481-.372z" fill="currentColor"/>
-                    <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z" fill="currentColor"/>
-                </svg>
-            }
+        @case ('ENVIADO') {
+        <svg viewBox="0 0 16 15" class="check-icon">
+            <path
+                d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z"
+                fill="currentColor" />
+        </svg>
+        }
+        @case ('ENTREGADO') {
+        <svg viewBox="0 0 16 15" class="check-icon double">
+            <path
+                d="M11.071.653a.457.457 0 0 0-.304-.102.493.493 0 0 0-.398.201l-6.283 8.06-2.6-2.475a.463.463 0 0 0-.339-.125.446.446 0 0 0-.328.152l-.435.492a.531.531 0 0 0-.13.396.53.53 0 0 0 .176.38l3.292 3.128c.135.13.324.2.518.2.194 0 .383-.07.518-.2l6.987-8.955a.512.512 0 0 0-.093-.702l-.481-.372z"
+                fill="currentColor" />
+            <path
+                d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z"
+                fill="currentColor" />
+        </svg>
+        }
+        @case ('LEIDO') {
+        <svg viewBox="0 0 16 15" class="check-icon double">
+            <path
+                d="M11.071.653a.457.457 0 0 0-.304-.102.493.493 0 0 0-.398.201l-6.283 8.06-2.6-2.475a.463.463 0 0 0-.339-.125.446.446 0 0 0-.328.152l-.435.492a.531.531 0 0 0-.13.396.53.53 0 0 0 .176.38l3.292 3.128c.135.13.324.2.518.2.194 0 .383-.07.518-.2l6.987-8.955a.512.512 0 0 0-.093-.702l-.481-.372z"
+                fill="currentColor" />
+            <path
+                d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z"
+                fill="currentColor" />
+        </svg>
+        }
         }
     </span>
-}
-
-
-    <button 
-        type="button" 
-        class="reply-btn" 
-        (click)="onReply()">
-        Responder
-    </button>
+    }
 
 
 </div>

@@ -217,3 +217,188 @@
 .download-btn:hover {
   color: #00a884;
 }
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chevron-btn {
+  background: none;
+  border: none;
+  color: #8696a0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.chat-message:hover .chevron-btn {
+  opacity: 1;
+}
+
+.chevron-btn:hover {
+  color: #e9edef;
+}
+
+.message-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+}
+
+.message-menu {
+  position: absolute;
+  top: 26px;
+  right: 4px;
+  background-color: #233138;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  z-index: 20;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  padding: 6px 0;
+}
+
+.message-menu button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  color: #d1d7db;
+  text-align: left;
+  padding: 9px 16px;
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+
+.message-menu button svg {
+  flex-shrink: 0;
+  color: #8696a0;
+}
+
+.message-menu button:hover {
+  background-color: #182229;
+}
+
+.message-menu button.danger {
+  color: #f15c6d;
+}
+
+.message-menu button.danger svg {
+  color: #f15c6d;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 3px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.edited-label {
+  font-size: 0.68rem;
+  color: #8696a0;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.edit-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 6px;
+}
+
+.edit-box input {
+  background-color: #0b141a;
+  border: 1px solid #2a3942;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #e9edef;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.edit-box input:focus {
+  border-color: #00a884;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.edit-actions button {
+  border: none;
+  border-radius: 16px;
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.cancel-btn {
+  background: transparent;
+  color: #8696a0;
+}
+
+.cancel-btn:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #e9edef;
+}
+
+.save-btn {
+  background-color: #00a884;
+  color: #0b141a;
+}
+
+.save-btn:hover {
+  background-color: #06cf9c;
+}
+
+.reply-preview-body {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.reply-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.reply-file-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.reply-text {
+  color: #a9b6bd;
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

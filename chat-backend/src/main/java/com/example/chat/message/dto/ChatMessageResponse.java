@@ -10,29 +10,20 @@ import java.time.LocalDateTime;
 public class ChatMessageResponse {
 
     private Long id;
-
     private Long userId;
-
     private String username;
-
     private String fullName;
-
     private String status;
-
     private Long recipientId;
-
     private LocalDateTime sentAt;
-
     private String content;
-
     private String fileUrl;
-
     private String fileName;
-
     private Long fileSize;
-
     private String type;
-
     private ReplyPreview replyTo;
+    private Boolean edited;
+    private LocalDateTime editedAt;
+    private Boolean deleted;
 
 }

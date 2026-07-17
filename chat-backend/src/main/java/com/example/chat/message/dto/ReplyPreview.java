@@ -13,4 +13,10 @@ public class ReplyPreview {
 
     private String content;
 
+    private String fileUrl;
+
+    private String fileName;
+
+    private String type;
+
 }
