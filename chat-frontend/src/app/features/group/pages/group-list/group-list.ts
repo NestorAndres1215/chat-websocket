@@ -18,7 +18,6 @@ import { UserModel } from '../../../user/models/user.model';
   styleUrl: './group-list.css',
 })
 export class GroupList implements OnInit {
-
   private readonly groupService = inject(GroupService);
   private readonly userService = inject(UserService);
 
@@ -74,29 +73,28 @@ export class GroupList implements OnInit {
   }
 
   createGroup(): void {
-
     if (!this.newGroupName.trim() || this.selectedMemberIds().size === 0) {
       return;
     }
 
-    this.groupService.create({
-      name: this.newGroupName.trim(),
-      createdBy: this.currentUserId,
-      memberIds: Array.from(this.selectedMemberIds()),
-    }).subscribe({
-      next: () => {
-        this.newGroupName = '';
-        this.selectedMemberIds.set(new Set());
-        this.showCreateForm.set(false);
-        this.loadGroups();
-      },
-      error: (err) => console.error(err),
-    });
-
+    this.groupService
+      .create({
+        name: this.newGroupName.trim(),
+        createdBy: this.currentUserId,
+        memberIds: Array.from(this.selectedMemberIds()),
+      })
+      .subscribe({
+        next: () => {
+          this.newGroupName = '';
+          this.selectedMemberIds.set(new Set());
+          this.showCreateForm.set(false);
+          this.loadGroups();
+        },
+        error: (err) => console.error(err),
+      });
   }
 
   onSelectGroup(group: GroupModel): void {
     this.selectGroup.emit(group);
   }
-
 }

@@ -2,19 +2,16 @@ import { Component, computed, EventEmitter, Input, Output, signal } from '@angul
 import { DisplayableMessage } from '../../../group/models/displayable-message.model';
 import { CommonModule } from '@angular/common';
 
-
-
 @Component({
   selector: 'app-message-item',
 
   standalone: true,
-imports:[CommonModule],
+  imports: [CommonModule],
   templateUrl: './message-item.html',
 
   styleUrl: './message-item.css',
 })
 export class MessageItem {
-
   @Input()
   set message(value: DisplayableMessage) {
     this._message.set(value);
@@ -41,16 +38,13 @@ export class MessageItem {
   reply = new EventEmitter<DisplayableMessage>();
 
   isOwn = computed(() => {
-
     const msgUserId = this._message().userId;
     const curUserId = this._currentUserId();
 
     return msgUserId === curUserId;
-
   });
 
   onReply(): void {
     this.reply.emit(this.message);
   }
-
 }

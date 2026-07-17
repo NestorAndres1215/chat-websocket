@@ -1,65 +1,144 @@
 <div class="chat-container">
 
     @if (user) {
-        <div class="current-user-badge">
-            Conectado como: <strong>{{ user.fullName }}</strong> ({{ user.username }})
-        </div>
+
+    <div class="current-user-badge">
+
+        Conectado como:
+        <strong>{{ user.fullName }}</strong>
+        ({{ user.username }})
+
+    </div>
+
     }
+
 
     <div class="users-panel">
 
         @for (u of onlineUsers(); track u.id) {
-            <button
-                type="button"
-                [class.active]="selectedRecipient()?.id === u.id"
-                (click)="selectRecipient(u)">
-                {{ u.fullName }}
-            </button>
+
+        <button type="button" [class.active]="selectedRecipient()?.id === u.id" (click)="selectRecipient(u)">
+
+            {{ u.fullName }}
+
+        </button>
+
         }
 
     </div>
+
+
+
 
     <div class="chat-panel">
 
+
         @if (!selectedRecipient()) {
 
-            <p class="empty-state">Selecciona un usuario para chatear.</p>
+
+        <p class="empty-state">
+
+            Selecciona un usuario para chatear.
+
+        </p>
+
 
         } @else {
 
-            <div class="messages">
 
-                @for (message of visibleMessages(); track message.id) {
 
-                    <app-message-item
-                        [message]="message"
-                        [currentUserId]="user?.id ?? 0"
-                        (reply)="startReply($event)">
-                    </app-message-item>
+        <div class="messages">
 
-                }
 
-            </div>
+            @for (message of visibleMessages(); track message.id) {
 
-            @if (replyingTo()) {
-                <div class="reply-bar">
-                    <span>Respondiendo a {{ replyingTo()?.username }}: {{ replyingTo()?.content }}</span>
-                    <button type="button" (click)="cancelReply()">✕</button>
-                </div>
+
+            <app-message-item [message]="message" [currentUserId]="user?.id ?? 0" (reply)="startReply($event)">
+
+            </app-message-item>
+
+
             }
 
-            <div class="input-area">
 
-                <input [(ngModel)]="content" placeholder="Escribe un mensaje..." (keydown.enter)="send()">
+        </div>
 
-                <button (click)="send()" [disabled]="!content.trim()">
-                    Enviar
-                </button>
 
-            </div>
+        @if (isTyping()) {
+        <div class="typing-indicator">
+            <svg class="typing-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 20l9-9-9-9-1.5 1.5L17 10H3v2h14l-6.5 6.5L12 20z" fill="#00a884" opacity="0" />
+                <path
+                    d="M20.665 3.717L2.135 10.94c-1.531.601-1.523 2.767.013 3.353l4.652 1.775 1.85 5.581c.253.763 1.185.99 1.746.396l2.611-2.72 4.984 3.667c.702.516 1.68.032 1.687-.797l.155-18.4c.008-.94-1.13-1.44-1.868-.842z"
+                    fill="currentColor" />
+            </svg>
+            <span class="typing-text">Escribiendo</span>
+            <span class="typing-dots">
+                <span></span><span></span><span></span>
+            </span>
+        </div>
+        }
+
+
+
+
+        @if (replyingTo()) {
+
+
+        <div class="reply-bar">
+
+
+            <span>
+
+                Respondiendo a
+                {{ replyingTo()?.username }}:
+                {{ replyingTo()?.content }}
+
+            </span>
+
+
+            <button type="button" (click)="cancelReply()">
+
+                ✕
+
+            </button>
+
+
+        </div>
+
 
         }
 
+
+
+
+
+
+        <div class="input-area">
+
+
+            <input [(ngModel)]="content" placeholder="Escribe un mensaje..." (input)="sendTyping()"
+                (keydown.enter)="send()">
+
+
+            <button (click)="send()" [disabled]="!content.trim()">
+
+
+                Enviar
+
+
+            </button>
+
+
+        </div>
+
+
+
+
+        }
+
+
     </div>
+
 
 </div>

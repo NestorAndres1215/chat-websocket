@@ -146,3 +146,54 @@
   color: #8696a0;
   cursor: not-allowed;
 }
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  color: #8696a0;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  animation: fadeIn 0.2s ease;
+}
+
+.typing-icon {
+  width: 15px;
+  height: 15px;
+  color: #00a884;
+  transform: rotate(0deg);
+  flex-shrink: 0;
+}
+
+.typing-text {
+  font-style: italic;
+}
+
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.typing-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #00a884;
+  animation: typingBounce 1.2s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(1) { animation-delay: 0s; }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

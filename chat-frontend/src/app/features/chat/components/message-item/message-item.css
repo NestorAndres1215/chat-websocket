@@ -7,7 +7,7 @@
   max-width: 65%;
   width: fit-content;
   margin-bottom: 10px;
-  margin-right: auto;   /* alineado a la izquierda por defecto */
+  margin-right: auto;  
   padding: 8px 12px;
   border-radius: 10px;
   background-color: #202c33;
@@ -17,7 +17,7 @@
 
 .chat-message.own {
   background-color: #005c4b;
-  margin-left: auto;    /* alineado a la derecha si es mío */
+  margin-left: auto; 
   margin-right: 0;
 }
 

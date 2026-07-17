@@ -49,4 +49,20 @@ export class ChatService {
     );
   }
 
+
+  typing() {
+
+  return this.websocket.typing$;
+
+}
+
+
+sendTyping(data:any){
+
+  this.websocket.send(
+    '/app/typing',
+    data
+  );
+
+}
 }

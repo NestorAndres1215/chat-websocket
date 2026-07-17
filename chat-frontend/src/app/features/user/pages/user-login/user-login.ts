@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 
@@ -18,18 +18,14 @@ import { UserService } from '../../services/user.service';
   styleUrl: './user-login.css',
 })
 export class UserLogin {
-
   username = '';
 
   errorMessage = '';
 
-  constructor(
-    private userService: UserService,
-    private router: Router,
-  ) {}
+  private readonly userService = inject(UserService);
+  private readonly router = inject(Router);
 
   login() {
-
     if (!this.username.trim()) {
       return;
     }
@@ -38,20 +34,18 @@ export class UserLogin {
 
     this.userService.search(this.username.trim()).subscribe({
       next: (users) => {
-
         const found = users.find(
-          (u) => u.username.toLowerCase() === this.username.trim().toLowerCase()
+          (u) => u.username.toLowerCase() === this.username.trim().toLowerCase(),
         );
 
         if (!found) {
           this.errorMessage = 'Usuario no encontrado.';
           return;
         }
-console.log(found)
+        console.log(found);
         this.userService.save(found);
 
         this.router.navigate(['/chat']);
-
       },
 
       error: (err) => {
@@ -59,7 +53,5 @@ console.log(found)
         this.errorMessage = 'Error al buscar usuario.';
       },
     });
-
   }
-
 }

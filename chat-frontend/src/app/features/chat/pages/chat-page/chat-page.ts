@@ -19,7 +19,8 @@ import { GroupChat } from '../../../group/pages/group-chat/group-chat';
   styleUrl: './chat-page.css',
 })
 export class ChatPage {
-  private userService = new UserService(); 
+  
+  private userService = new UserService();
 
   activeTab = signal<'private' | 'groups'>('private');
 
