@@ -17,9 +17,58 @@
 
         @for (u of onlineUsers(); track u.id) {
 
-        <button type="button" [class.active]="selectedRecipient()?.id === u.id" (click)="selectRecipient(u)">
+        <button type="button" class="user-btn" (click)="selectRecipient(u)">
 
-            {{ u.fullName }}
+            <div class="user-details">
+
+                <div class="user-details-top">
+                    <span class="user-name">{{ u.fullName }}</span>
+                    @if (lastMessageTime(u.id)) {
+                    <span class="user-time">{{ lastMessageTime(u.id) | date:'shortTime' }}</span>
+                    }
+                </div>
+
+                <div class="user-details-bottom">
+
+                    @if (isLastMessageFromMe(u.id)) {
+
+                    @switch (lastMessageStatus(u.id)) {
+                    @case ('ENVIADO') {
+                    <svg class="preview-check" viewBox="0 0 16 15" width="14" height="14">
+                        <path
+                            d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z"
+                            fill="currentColor" />
+                    </svg>
+                    }
+                    @case ('ENTREGADO') {
+                    <svg class="preview-check double" viewBox="0 0 16 15" width="14" height="14">
+                        <path
+                            d="M11.071.653a.457.457 0 0 0-.304-.102.493.493 0 0 0-.398.201l-6.283 8.06-2.6-2.475a.463.463 0 0 0-.339-.125.446.446 0 0 0-.328.152l-.435.492a.531.531 0 0 0-.13.396.53.53 0 0 0 .176.38l3.292 3.128c.135.13.324.2.518.2.194 0 .383-.07.518-.2l6.987-8.955a.512.512 0 0 0-.093-.702l-.481-.372z"
+                            fill="currentColor" />
+                        <path
+                            d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z"
+                            fill="currentColor" />
+                    </svg>
+                    }
+                    @case ('LEIDO') {
+                    <svg class="preview-check double read" viewBox="0 0 16 15" width="14" height="14">
+                        <path
+                            d="M11.071.653a.457.457 0 0 0-.304-.102.493.493 0 0 0-.398.201l-6.283 8.06-2.6-2.475a.463.463 0 0 0-.339-.125.446.446 0 0 0-.328.152l-.435.492a.531.531 0 0 0-.13.396.53.53 0 0 0 .176.38l3.292 3.128c.135.13.324.2.518.2.194 0 .383-.07.518-.2l6.987-8.955a.512.512 0 0 0-.093-.702l-.481-.372z"
+                            fill="currentColor" />
+                        <path
+                            d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z"
+                            fill="currentColor" />
+                    </svg>
+                    }
+                    }
+
+                    }
+
+                    <span class="user-preview">{{ lastMessagePreview(u.id) }}</span>
+
+                </div>
+
+            </div>
 
         </button>
 

@@ -155,10 +155,10 @@ export class ChatBox implements OnInit, OnDestroy {
   }
 
   selectRecipient(recipient: UserModel): void {
-  this.selectedRecipient.set(recipient);
-  this.replyingTo.set(null);
-  this.loadPinned();
-  this.pinnedExpanded.set(false);
+    this.selectedRecipient.set(recipient);
+    this.replyingTo.set(null);
+    this.loadPinned();
+    this.pinnedExpanded.set(false);
     if (!this.user) {
       return;
     }
@@ -396,7 +396,144 @@ export class ChatBox implements OnInit, OnDestroy {
 
   pinnedExpanded = signal(false);
 
-togglePinnedExpanded(): void {
-  this.pinnedExpanded.update((v) => !v);
+  togglePinnedExpanded(): void {
+    this.pinnedExpanded.update((v) => !v);
+  }
+
+  // --- Menú de opciones por usuario ---
+
+  activeUserMenu = signal<number | null>(null);
+
+  showUserInfo = signal<UserModel | null>(null);
+
+  toggleUserMenu(userId: number, event: MouseEvent): void {
+    event.stopPropagation();
+    this.activeUserMenu.update((current) => (current === userId ? null : userId));
+  }
+
+  closeUserMenu(): void {
+    this.activeUserMenu.set(null);
+  }
+
+  openUserInfo(user: UserModel, event: MouseEvent): void {
+    event.stopPropagation();
+    this.showUserInfo.set(user);
+    this.closeUserMenu();
+  }
+
+  closeUserInfo(): void {
+    this.showUserInfo.set(null);
+  }
+
+  clearChat(user: UserModel, event: MouseEvent): void {
+    event.stopPropagation();
+    this.closeUserMenu();
+
+    const confirmed = window.confirm(
+      `¿Vaciar todos los mensajes con ${user.fullName}? Esta acción no se puede deshacer.`,
+    );
+
+    if (!confirmed || !this.user) {
+      return;
+    }
+/*
+    this.chatService.clearConversation(this.user.id, user.id).subscribe({
+      next: () => {
+        this.messages.update((current) =>
+          current.filter(
+            (m) =>
+              !(
+                (m.userId === this.user!.id && m.recipientId === user.id) ||
+                (m.userId === user.id && m.recipientId === this.user!.id)
+              ),
+          ),
+        );
+        this.pinnedMessages.set([]);
+      },
+      error: (error) => {
+        console.error('Error vaciando la conversación', error);
+      },
+    });*/
+  }
+
+  deleteChat(user: UserModel, event: MouseEvent): void {
+    event.stopPropagation();
+    this.closeUserMenu();
+
+    const confirmed = window.confirm(
+      `¿Eliminar el chat con ${user.fullName}? Esta acción no se puede deshacer.`,
+    );
+
+    if (!confirmed || !this.user) {
+      return;
+    }
+    /*
+  this.chatService.deleteConversation(this.user.id, user.id).subscribe({
+    next: () => {
+      this.messages.update((current) =>
+        current.filter(
+          (m) =>
+            !((m.userId === this.user!.id && m.recipientId === user.id) ||
+              (m.userId === user.id && m.recipientId === this.user!.id)),
+        ),
+      );
+      this.pinnedMessages.set([]);
+
+      if (this.selectedRecipient()?.id === user.id) {
+        this.selectedRecipient.set(null);
+      }
+    },
+    error: (error) => {
+      console.error('Error eliminando el chat', error);
+    },
+  });*/
+  }
+
+  lastMessageByUser = computed(() => {
+  const me = this.user?.id ?? 0;
+  const map = new Map<number, ChatMessageResponse>();
+
+  for (const m of this.messages()) {
+    const otherId = m.userId === me ? m.recipientId : m.userId === me ? m.recipientId : null;
+
+    // el otro participante de la conversación (sea quien la envió o la recibió)
+    let participantId: number | null = null;
+    if (m.userId === me) participantId = m.recipientId;
+    else if (m.recipientId === me) participantId = m.userId;
+
+    if (participantId === null) continue;
+
+    const current = map.get(participantId);
+    if (!current || new Date(m.sentAt) > new Date(current.sentAt)) {
+      map.set(participantId, m);
+    }
+  }
+
+  return map;
+});
+
+lastMessagePreview(userId: number): string {
+  const msg = this.lastMessageByUser().get(userId);
+  if (!msg) return '';
+  if (msg.deleted) return '🚫 Mensaje eliminado';
+  if (msg.fileUrl && msg.type === 'IMAGE') return '📷 Foto';
+  if (msg.fileUrl) return `📎 ${msg.fileName ?? 'Archivo'}`;
+  return msg.content ?? '';
+}
+
+lastMessageTime(userId: number): string {
+  const msg = this.lastMessageByUser().get(userId);
+  return msg ? msg.sentAt : '';
+}
+
+isLastMessageFromMe(userId: number): boolean {
+  const msg = this.lastMessageByUser().get(userId);
+  return msg ? msg.userId === this.user?.id : false;
+}
+
+lastMessageStatus(userId: number): string | null {
+  const msg = this.lastMessageByUser().get(userId);
+  if (!msg || msg.userId !== this.user?.id) return null;
+  return msg.status;
 }
 }
